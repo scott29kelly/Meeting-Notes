@@ -4,466 +4,528 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucks Church Weekly Meeting Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* Tailwind gray-400 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* Tailwind gray-500 */
+        }
+        .fade-in {
+            animation: fadeInAnimation 0.5s ease-out forwards;
+        }
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .copy-btn.copied {
+            background-color: #22c55e !important; /* Tailwind green-500 */
+            color: white !important;
+        }
+        .modal {
+            /* display: none; by default, managed by Tailwind 'hidden' class */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+            /* align-items: center; and justify-content: center; handled by Tailwind 'flex items-center justify-center' */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; /* Adjusted for flex centering */
             padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 0.5rem;
             text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-
-        .form-container {
-            padding: 40px;
-        }
-
-        .category {
-            margin-bottom: 30px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 25px;
-            border-left: 4px solid #4CAF50;
-        }
-
-        .category h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            display: flex;
-            align-items: center;
-        }
-
-        .category-icon {
-            margin-right: 10px;
-            font-size: 1.2em;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 100px;
-            border: 2px solid #e1e5e9;
-            border-radius: 6px;
-            padding: 15px;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            transition: border-color 0.3s ease;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        .placeholder-text {
-            color: #666;
-            font-size: 14px;
-            margin-top: 8px;
-            font-style: italic;
-        }
-
-        .generate-btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: block;
-            margin: 40px auto 0;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-
-        .generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-        }
-
-        .output-section {
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid #e1e5e9;
-            display: none;
-        }
-
-        .output-container {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 30px;
-            border: 2px solid #e1e5e9;
-        }
-
-        .output-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .output-header h3 {
-            color: #333;
-            font-size: 1.4em;
-        }
-
-        .copy-btn {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            background: #1976D2;
-        }
-
-        .output-text {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 20px;
-            white-space: pre-wrap;
-            font-family: Georgia, serif;
-            line-height: 1.6;
-            color: #333;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .instructions {
-            background: #e3f2fd;
-            border: 1px solid #2196F3;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .instructions h4 {
-            color: #1976D2;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .instructions ol {
-            margin-left: 20px;
-            line-height: 1.6;
-        }
-
-        .instructions li {
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-            }
-            
-            .form-container {
-                padding: 20px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 1.8em;
-            }
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🏛️ Bucks Church Weekly Notes</h1>
-            <p>Simple meeting notes generator</p>
+<body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
+    <div class="container bg-white w-full max-w-3xl mx-auto rounded-xl shadow-2xl overflow-hidden fade-in">
+        <!-- Header Section -->
+        <div class="header bg-gradient-to-r from-green-500 to-emerald-600 text-white p-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Weekly Notes</h1>
+            <p class="text-lg md:text-xl opacity-90">Simple Meeting Notes Generator</p>
         </div>
 
-        <div class="form-container">
-            <div class="instructions">
-                <h4>📋 How to Use This Tool</h4>
-                <ol>
-                    <li><strong>Fill in the weekly updates</strong> in any/all categories below</li>
-                    <li><strong>Click "Generate Professional Meeting Notes"</strong> to create your report</li>
+        <div class="form-container p-6 md:p-10 space-y-8">
+            <!-- Instructions Section -->
+            <div class="instructions bg-sky-50 border-l-4 border-sky-500 text-sky-700 p-6 rounded-lg shadow-sm">
+                <h4 class="text-xl font-semibold mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    How to Use This Tool
+                </h4>
+                <ol class="list-decimal list-inside space-y-1 text-sm md:text-base">
+                    <li><strong>Enter individual updates</strong> in the fields for each category.</li>
+                    <li>Use the <strong>"+ Add another item"</strong> button to add more updates to a category.</li>
+                    <li><strong>Click "Generate Professional Meeting Notes"</strong> to create your report.</li>
                     <li><strong>Copy the generated notes</strong> and use them in your staff meeting!</li>
                 </ol>
             </div>
 
-            <div class="category">
-                <h3><span class="category-icon">📅</span>Upcoming Events & Programs</h3>
-                <textarea id="events" placeholder="List upcoming events, programs, special services, deadlines..."></textarea>
-                <div class="placeholder-text">Example: Easter service planning meeting March 15, Youth retreat needs 3 more chaperones</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">⛪</span>Ministry Updates</h3>
-                <textarea id="ministries" placeholder="Updates from Youth, Children's, Worship, Small Groups, etc..."></textarea>
-                <div class="placeholder-text">Example: Youth group had 25 attendees, Children's ministry needs new volunteers</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">🏗️</span>Facility & Maintenance</h3>
-                <textarea id="facilities" placeholder="Building issues, repairs needed, improvements, safety concerns..."></textarea>
-                <div class="placeholder-text">Example: Sanctuary heating system repaired, Parking lot needs repainting</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">💰</span>Financial Updates</h3>
-                <textarea id="finances" placeholder="Budget updates, major expenses, fundraising, giving trends..."></textarea>
-                <div class="placeholder-text">Example: Monthly giving up 5%, Need approval for sound system repair $800</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">👥</span>Staff & Leadership</h3>
-                <textarea id="staff" placeholder="Staff updates, new hires, schedule changes, training..."></textarea>
-                <div class="placeholder-text">Example: Sarah starting maternity leave April 1, Board meeting scheduled for March 20</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">🤝</span>Community & Outreach</h3>
-                <textarea id="community" placeholder="Community partnerships, outreach programs, missions..."></textarea>
-                <div class="placeholder-text">Example: Food bank partnership approved, Mission trip fundraiser raised $2,000</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">🙏</span>Prayer Requests & Pastoral Care</h3>
-                <textarea id="pastoral" placeholder="General prayer needs, pastoral care updates (keep confidential details private)..."></textarea>
-                <div class="placeholder-text">Example: 3 hospital visits this week, Prayer chain activated for community crisis</div>
-            </div>
-
-            <div class="category">
-                <h3><span class="category-icon">✅</span>Action Items & Follow-ups</h3>
-                <textarea id="actions" placeholder="Tasks from last week, assignments, deadlines, who's responsible..."></textarea>
-                <div class="placeholder-text">Example: John to call contractor about roof, Sarah to update website events page</div>
-            </div>
-
-            <button class="generate-btn" onclick="generateReport()">
-                ✨ Generate Professional Meeting Notes
-            </button>
-
-            <div class="output-section" id="outputSection">
-                <div class="output-container">
-                    <div class="output-header">
-                        <h3 id="outputTitle">📋 Your Professional Meeting Notes</h3>
-                        <button class="copy-btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+            <!-- Form Categories -->
+            <div class="space-y-6">
+                <!-- Upcoming Events & Programs -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">📅</span>Upcoming Events & Programs
+                    </h3>
+                    <div id="events-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter event or program detail...">
+                        </div>
                     </div>
-                    <div class="output-text" id="outputText"></div>
+                    <button type="button" onclick="addInput('events', 'Enter another event or program...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Kids Easter Celebration on April 12th</div>
+                </div>
+
+                <!-- Ministry Updates -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">⛪</span>Ministry Updates
+                    </h3>
+                    <div id="ministries-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter ministry update...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('ministries', 'Enter another ministry update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Youth Group attendance was 35 last Sunday</div>
+                </div>
+
+                <!-- Facility & Maintenance -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">🏗️</span>Facility & Maintenance
+                    </h3>
+                    <div id="facilities-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter facility/maintenance item...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('facilities', 'Enter another facility/maintenance item...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Yard Cleanup Day scheduled for May 3rd</div>
+                </div>
+
+                <!-- Financial Updates -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">💰</span>Financial Updates
+                    </h3>
+                    <div id="finances-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter financial update...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('finances', 'Enter another financial update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Budget Vote on Dec 14th</div>
+                </div>
+
+                <!-- Staff & Leadership -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">👥</span>Staff & Leadership
+                    </h3>
+                    <div id="staff-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter staff/leadership update...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('staff', 'Enter another staff/leadership update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Weekly Staff Meeting Wed 9am</div>
+                </div>
+
+                <!-- Community & Outreach -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">🤝</span>Community & Outreach
+                    </h3>
+                    <div id="community-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter community/outreach item...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('community', 'Enter another community/outreach item...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: OCC Shoebox collection week Nov 17-24</div>
+                </div>
+
+                <!-- Prayer Requests & Pastoral Care -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">🙏</span>Prayer Requests & Pastoral Care
+                    </h3>
+                    <div id="pastoral-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter prayer request or pastoral care note...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('pastoral', 'Enter another prayer/pastoral note...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Pray for upcoming Women's Retreat</div>
+                </div>
+
+                <!-- Action Items & Follow-ups -->
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+                        <span class="category-icon mr-2 text-xl">✅</span>Action Items & Follow-ups
+                    </h3>
+                    <div id="actions-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter action item or follow-up...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('actions', 'Enter another action item...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Ken to confirm budget for A Night in Bethlehem</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center mt-8">
+                <button class="generate-btn w-full md:w-auto flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50" onclick="generateReport()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                    </svg>
+                    ✨ Generate Professional Meeting Notes
+                </button>
+                <button type="button" id="clearAllBtn" 
+                        class="w-full md:w-auto flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50" 
+                        onclick="requestClearAllConfirmation()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Clear All Notes
+                </button>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section mt-10 pt-6 border-t border-slate-200" id="outputSection" style="display: none;">
+                <div class="output-container bg-slate-100 p-6 rounded-lg shadow-inner">
+                    <div class="output-header flex justify-between items-center mb-4">
+                        <h3 id="outputTitle" class="text-xl font-semibold text-slate-800">📋 Your Professional Meeting Notes</h3>
+                        <button class="copy-btn bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" onclick="copyToClipboard()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            Copy to Clipboard
+                        </button>
+                    </div>
+                    <div class="output-text bg-white border border-slate-300 rounded-md p-4 whitespace-pre-wrap font-serif text-sm text-slate-700 max-h-[400px] overflow-y-auto shadow-sm" id="outputText"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal for Custom Alert / Confirmation -->
+    <div id="customModal" class="modal hidden items-center justify-center"> <!-- Initially hidden, flex added by JS -->
+        <div class="modal-content p-6 rounded-lg bg-white shadow-xl">
+            <p id="customModalMessage" class="text-slate-700 text-lg mb-6"></p>
+            <div class="flex justify-center gap-4">
+                <button id="customModalConfirmBtn" class="modal-confirm-btn bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-md transition-colors">Confirm</button>
+                <button id="customModalCancelBtn" class="modal-cancel-btn bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold py-2 px-6 rounded-md transition-colors">Cancel</button>
+                <button id="customModalOkBtn" class="modal-ok-btn bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-md transition-colors" style="display:none;">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function getNextWednesday() {
-            const today = new Date();
-            const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-            const daysUntilWednesday = (3 - dayOfWeek + 7) % 7; // 3 = Wednesday
-            
-            // If today is Wednesday, use today. Otherwise, find next Wednesday
-            const nextWednesday = new Date(today);
-            if (daysUntilWednesday === 0 && today.getDay() === 3) {
-                // Today is Wednesday, use today
-                return nextWednesday;
-            } else if (daysUntilWednesday === 0) {
-                // Today is not Wednesday but calculation returned 0, so add 7 days
-                nextWednesday.setDate(today.getDate() + 7);
-            } else {
-                // Add days to get to next Wednesday
-                nextWednesday.setDate(today.getDate() + daysUntilWednesday);
-            }
-            
-            return nextWednesday;
+        const customModal = document.getElementById('customModal');
+        const customModalMessage = document.getElementById('customModalMessage');
+        const customModalConfirmBtn = document.getElementById('customModalConfirmBtn');
+        const customModalCancelBtn = document.getElementById('customModalCancelBtn');
+        const customModalOkBtn = document.getElementById('customModalOkBtn');
+
+        // For simple alerts
+        function showAlert(message) {
+            customModalMessage.textContent = message;
+            customModalConfirmBtn.style.display = 'none';
+            customModalCancelBtn.style.display = 'none';
+            customModalOkBtn.style.display = 'inline-block';
+            customModalOkBtn.onclick = function() {
+                customModal.classList.add('hidden');
+                customModal.classList.remove('flex');
+            };
+            customModal.classList.remove('hidden');
+            customModal.classList.add('flex');
         }
 
-        function generateReport() {
-            const sections = {
-                'Upcoming Events & Programs': document.getElementById('events').value,
-                'Ministry Updates': document.getElementById('ministries').value,
-                'Facility & Maintenance': document.getElementById('facilities').value,
-                'Financial Updates': document.getElementById('finances').value,
-                'Staff & Leadership': document.getElementById('staff').value,
-                'Community & Outreach': document.getElementById('community').value,
-                'Prayer Requests & Pastoral Care': document.getElementById('pastoral').value,
-                'Action Items & Follow-ups': document.getElementById('actions').value
+        // For confirmation dialogs
+        function showConfirmation(message, onConfirm) {
+            customModalMessage.textContent = message;
+            customModalConfirmBtn.style.display = 'inline-block';
+            customModalCancelBtn.style.display = 'inline-block';
+            customModalOkBtn.style.display = 'none';
+
+            customModalConfirmBtn.onclick = function() {
+                customModal.classList.add('hidden');
+                customModal.classList.remove('flex');
+                if (onConfirm) onConfirm();
+            };
+            customModalCancelBtn.onclick = function() {
+                customModal.classList.add('hidden');
+                customModal.classList.remove('flex');
+            };
+            customModal.classList.remove('hidden');
+            customModal.classList.add('flex');
+        }
+        
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target == customModal) {
+                customModal.classList.add('hidden');
+                customModal.classList.remove('flex');
+            }
+        }
+
+        // Function to add a new input field to a category
+        function addInput(categoryId, placeholderText) {
+            const container = document.getElementById(categoryId + '-inputs');
+            if (!container) return;
+
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'flex items-center space-x-2 mt-2 dynamic-input-group';
+
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.className = 'flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400';
+            newInput.placeholder = placeholderText || 'Enter item...';
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'p-2 text-red-500 hover:text-red-700 rounded-md hover:bg-red-100 transition-colors duration-150';
+            removeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`;
+            removeButton.setAttribute('aria-label', 'Remove item');
+            removeButton.onclick = function() {
+                inputGroup.remove();
             };
 
-            // Check if at least one section has content
-            const hasContent = Object.values(sections).some(value => value && value.trim());
+            inputGroup.appendChild(newInput);
+            inputGroup.appendChild(removeButton);
+            container.appendChild(inputGroup);
+            newInput.focus(); // Auto-focus the newly added input field
+        }
+
+
+        function getNextWednesday() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysUntilWednesday = (3 - dayOfWeek + 7) % 7;
+            const nextWednesday = new Date(today);
+            if (daysUntilWednesday === 0 && today.getDay() === 3) {
+                // Today is Wednesday
+            } else if (daysUntilWednesday === 0) {
+                nextWednesday.setDate(today.getDate() + 7);
+            } else {
+                nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+            }
+            return nextWednesday;
+        }
+        
+        function actualClearAllNotes() {
+            const categoryIds = ['events', 'ministries', 'facilities', 'finances', 'staff', 'community', 'pastoral', 'actions'];
+            categoryIds.forEach(id => {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                if (inputsContainer) {
+                    // Clear the first (static) input
+                    const staticInput = inputsContainer.querySelector('input[type="text"]');
+                    if (staticInput) {
+                        staticInput.value = '';
+                    }
+                    // Remove all dynamically added input groups
+                    const dynamicInputs = inputsContainer.querySelectorAll('.dynamic-input-group');
+                    dynamicInputs.forEach(group => group.remove());
+                }
+            });
+            // Hide the output section and clear its text
+            document.getElementById('outputSection').style.display = 'none';
+            document.getElementById('outputText').textContent = ''; 
+            // showAlert("All notes have been cleared."); // Optional: uncomment for a success message
+        }
+
+        function requestClearAllConfirmation() {
+            showConfirmation("Are you sure you want to clear all notes? This action cannot be undone.", actualClearAllNotes);
+        }
+
+
+        function generateReport() {
+            const categoryIdToName = {
+                'events': 'Upcoming Events & Programs',
+                'ministries': 'Ministry Updates',
+                'facilities': 'Facility & Maintenance',
+                'finances': 'Financial Updates',
+                'staff': 'Staff & Leadership',
+                'community': 'Community & Outreach',
+                'pastoral': 'Prayer Requests & Pastoral Care',
+                'actions': 'Action Items & Follow-ups'
+            };
+
+            const sectionsData = {};
+
+            for (const id in categoryIdToName) {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                if (inputsContainer) {
+                    const inputElements = inputsContainer.querySelectorAll('input[type="text"]');
+                    let categoryItems = [];
+                    inputElements.forEach(input => {
+                        if (input.value.trim() !== '') {
+                            categoryItems.push(input.value.trim());
+                        }
+                    });
+                    sectionsData[categoryIdToName[id]] = categoryItems.join('\n');
+                } else {
+                    sectionsData[categoryIdToName[id]] = '';
+                }
+            }
+
+            const hasContent = Object.values(sectionsData).some(value => value && value.trim());
             
             if (!hasContent) {
-                alert('Please fill in at least one section before generating the report.');
+                showAlert('Please fill in at least one item in any category before generating the report.'); 
                 return;
             }
 
-            // Generate professional meeting notes with proper spacing and formatting
-            let report = `BUCKS CHURCH\n`;
-            report += `Weekly Staff Meeting Notes\n`;
-            report += `${getNextWednesday().toLocaleDateString('en-US', { 
+            let reportContent = `BUCKS CHURCH\n`;
+            reportContent += `Weekly Staff Meeting Notes\n`;
+            reportContent += `${getNextWednesday().toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
-            })}\n\n`;
+            })}\n`; // Removed extra \n here
+            reportContent += `${'-'.repeat(50)}\n\n`; // Added separator line after the date
 
-            let firstSection = true;
+            let isFirstActualSection = true;
 
-            // Add each section that has content
-            if (sections['Upcoming Events & Programs'] && sections['Upcoming Events & Programs'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `UPCOMING EVENTS & PROGRAMS\n`;
-                report += formatSection(sections['Upcoming Events & Programs']);
-                report += `\n\n`;
-                firstSection = false;
+            for (const id in categoryIdToName) {
+                const sectionName = categoryIdToName[id];
+                const content = sectionsData[sectionName];
+                if (content && content.trim()) {
+                    if (!isFirstActualSection) {
+                        reportContent += `\n`; 
+                    }
+                    reportContent += `${sectionName.toUpperCase()}\n`;
+                    reportContent += formatSection(content); 
+                    reportContent += `\n\n`;
+                    isFirstActualSection = false;
+                }
             }
+            
+            reportContent = reportContent.trimEnd(); 
 
-            if (sections['Ministry Updates'] && sections['Ministry Updates'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `MINISTRY UPDATES\n`;
-                report += formatSection(sections['Ministry Updates']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            if (sections['Facility & Maintenance'] && sections['Facility & Maintenance'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `FACILITY & MAINTENANCE\n`;
-                report += formatSection(sections['Facility & Maintenance']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            if (sections['Financial Updates'] && sections['Financial Updates'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `FINANCIAL UPDATES\n`;
-                report += formatSection(sections['Financial Updates']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            if (sections['Staff & Leadership'] && sections['Staff & Leadership'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `STAFF & LEADERSHIP\n`;
-                report += formatSection(sections['Staff & Leadership']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            if (sections['Community & Outreach'] && sections['Community & Outreach'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `COMMUNITY & OUTREACH\n`;
-                report += formatSection(sections['Community & Outreach']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            if (sections['Prayer Requests & Pastoral Care'] && sections['Prayer Requests & Pastoral Care'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `PASTORAL CARE & PRAYER REQUESTS\n`;
-                report += formatSection(sections['Prayer Requests & Pastoral Care']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            if (sections['Action Items & Follow-ups'] && sections['Action Items & Follow-ups'].trim()) {
-                if (!firstSection) report += `${'-'.repeat(50)}\n\n`;
-                report += `ACTION ITEMS & FOLLOW-UPS\n`;
-                report += formatSection(sections['Action Items & Follow-ups']);
-                report += `\n\n`;
-                firstSection = false;
-            }
-
-            // Add footer
-            report = report.trimEnd();
-
-            // Display the report
-            document.getElementById('outputText').textContent = report;
-            document.getElementById('outputSection').style.display = 'block';
-            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('outputText').textContent = reportContent;
+            const outputSection = document.getElementById('outputSection');
+            outputSection.style.display = 'block';
+            outputSection.classList.add('fade-in'); 
+            outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function formatSection(text) {
-            // Convert text to proper bullet points with better formatting
-            const lines = text.split('\n').filter(line => line.trim());
-            return lines.map(line => {
-                const trimmed = line.trim();
-                if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
-                    // Clean up existing bullet points
-                    return `• ${trimmed.substring(1).trim()}`;
-                } else {
-                    // Add bullet points to regular text
-                    return `• ${trimmed}`;
-                }
-            }).join('\n');
+            const lines = text.split('\n').filter(line => line.trim() !== ''); 
+            return lines.map(line => `• ${line.trim()}`).join('\n');
         }
 
         function copyToClipboard() {
-            const outputText = document.getElementById('outputText');
+            const outputText = document.getElementById('outputText').textContent;
+            const btn = document.querySelector('.copy-btn');
+            const originalButtonText = btn.innerHTML; 
             
-            try {
-                navigator.clipboard.writeText(outputText.textContent).then(function() {
-                    const btn = document.querySelector('.copy-btn');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '✅ Copied!';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(outputText).then(() => {
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Copied!`;
+                    btn.classList.add('copied'); 
                     setTimeout(() => {
-                        btn.innerHTML = originalText;
+                        btn.innerHTML = originalButtonText;
+                        btn.classList.remove('copied'); 
                     }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy with Clipboard API:', err);
+                    fallbackCopyTextToClipboard(outputText, btn, originalButtonText); 
                 });
-            } catch (err) {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = outputText.textContent;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                
-                const btn = document.querySelector('.copy-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Copied!';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                }, 2000);
+            } else {
+                fallbackCopyTextToClipboard(outputText, btn, originalButtonText);
             }
+        }
+
+        function fallbackCopyTextToClipboard(text, btn, originalButtonText) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Copied!`;
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.innerHTML = originalButtonText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                } else {
+                    showAlert('Failed to copy text. Please try again or copy manually.'); 
+                }
+            } catch (err) {
+                showAlert('Failed to copy text. Please try again or copy manually.'); 
+            }
+            document.body.removeChild(textArea);
         }
     </script>
 </body>
