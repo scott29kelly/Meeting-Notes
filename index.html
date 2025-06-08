@@ -9,9 +9,9 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Light gray background */
+            background-color: #f0f2f5;
         }
-        /* Custom scrollbar for a cleaner look */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -20,11 +20,11 @@
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; /* Tailwind gray-400 */
+            background: #cbd5e1;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; /* Tailwind gray-500 */
+            background: #94a3b8;
         }
         .fade-in {
             animation: fadeInAnimation 0.5s ease-out forwards;
@@ -34,25 +34,23 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .copy-btn.copied {
-            background-color: #22c55e !important; /* Tailwind green-500 */
+            background-color: #22c55e !important;
             color: white !important;
         }
         .modal {
-            /* display: none; by default, managed by Tailwind 'hidden' class */
-            position: fixed; /* Stay in place */
-            z-index: 100; /* Sit on top */
+            position: fixed;
+            z-index: 100;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
             padding-top: 60px;
-            /* align-items: center; and justify-content: center; handled by Tailwind 'flex items-center justify-center' */
         }
         .modal-content {
             background-color: #fefefe;
-            margin: auto; /* Adjusted for flex centering */
+            margin: auto;
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
@@ -65,14 +63,14 @@
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
     <div class="container bg-white w-full max-w-3xl mx-auto rounded-xl shadow-2xl overflow-hidden fade-in">
-        <!-- Header Section -->
+        <!-- Header -->
         <div class="header bg-gradient-to-r from-green-500 to-emerald-600 text-white p-8 text-center">
             <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Weekly Notes</h1>
             <p class="text-lg md:text-xl opacity-90">Simple Meeting Notes Generator</p>
         </div>
 
         <div class="form-container p-6 md:p-10 space-y-8">
-            <!-- Instructions Section -->
+            <!-- Instructions -->
             <div class="instructions bg-sky-50 border-l-4 border-sky-500 text-sky-700 p-6 rounded-lg shadow-sm">
                 <h4 class="text-xl font-semibold mb-3 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -81,149 +79,196 @@
                     How to Use This Tool
                 </h4>
                 <ol class="list-decimal list-inside space-y-1 text-sm md:text-base">
-                    <li><strong>Enter individual updates</strong> in the fields for each category.</li>
-                    <li>Use the <strong>"+ Add another item"</strong> button to add more updates to a category.</li>
-                    <li><strong>Click "Generate Professional Meeting Notes"</strong> to create your report.</li>
-                    <li><strong>Copy the generated notes</strong> and use them in your staff meeting!</li>
+                    <li>Enter individual updates in the fields for each category.</li>
+                    <li>Use the "+ Add another item" button to add more updates.</li>
+                    <li>Click "Generate" to create your report.</li>
+                    <li>Copy the notes and use them in your meeting!</li>
                 </ol>
             </div>
 
-            <!-- Form Categories -->
+            <!-- New Categories -->
             <div class="space-y-6">
-                <!-- Upcoming Events & Programs -->
+                <!-- Template for a category -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">📅</span>Upcoming Events & Programs
-                    </h3>
-                    <div id="events-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🙏 Prayer Requests</h3>
+                    <div id="prayer-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter event or program detail...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter prayer request...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('events', 'Enter another event or program...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('prayer', 'Enter another prayer request...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Kids Easter Celebration on April 12th</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Pray for the Smith family</div>
                 </div>
 
-                <!-- Ministry Updates -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">⛪</span>Ministry Updates
-                    </h3>
-                    <div id="ministries-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">❤️ Body Concerns/Updates</h3>
+                    <div id="body_concerns-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter ministry update...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter concern or update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('ministries', 'Enter another ministry update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('body_concerns', 'Enter another concern...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Youth Group attendance was 35 last Sunday</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: John B. is recovering from surgery</div>
+                </div>
+                
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">💰 Budget</h3>
+                    <div id="budget-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter budget update...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('budget', 'Enter another budget update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Weekly giving was $12,500</div>
                 </div>
 
-                <!-- Facility & Maintenance -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">🏗️</span>Facility & Maintenance
-                    </h3>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">⏪ Last Sunday</h3>
+                    <div id="last_sunday-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter update from last Sunday...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('last_sunday', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Attendance was 350, with 5 first-time visitors</div>
+                </div>
+
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">⏩ This Coming Sunday</h3>
+                    <div id="this_sunday-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter plans for this Sunday...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('this_sunday', 'Enter another plan...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Pastor Ken is preaching on John 3</div>
+                </div>
+
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🎉 Large Upcoming Events</h3>
+                    <div id="large_events-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter large event update...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('large_events', 'Enter another event...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Fall Fest is on Sept 20th, need more volunteers</div>
+                </div>
+
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🏘️ Small Groups/Community</h3>
+                    <div id="small_groups-inputs" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter small group update...">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInput('small_groups', 'Enter another group update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Add another item
+                    </button>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: The "Love & Respect" marriage group is starting a new study</div>
+                </div>
+                
+                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🛠️ Facilities</h3>
                     <div id="facilities-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter facility/maintenance item...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter facilities update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('facilities', 'Enter another facility/maintenance item...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('facilities', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Yard Cleanup Day scheduled for May 3rd</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Sanctuary AC unit scheduled for maintenance on Tuesday</div>
                 </div>
 
-                <!-- Financial Updates -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">💰</span>Financial Updates
-                    </h3>
-                    <div id="finances-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">📱 Media/Communication</h3>
+                    <div id="media-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter financial update...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter media/comm update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('finances', 'Enter another financial update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('media', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Budget Vote on Dec 14th</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: New website homepage is live</div>
                 </div>
 
-                <!-- Staff & Leadership -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">👥</span>Staff & Leadership
-                    </h3>
-                    <div id="staff-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">👨 Men's Ministry</h3>
+                    <div id="mens_ministry-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter staff/leadership update...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Men's Ministry update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('staff', 'Enter another staff/leadership update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('mens_ministry', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Weekly Staff Meeting Wed 9am</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Men's Breakfast is this Saturday at 8:30am</div>
                 </div>
 
-                <!-- Community & Outreach -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">🤝</span>Community & Outreach
-                    </h3>
-                    <div id="community-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">👩 Women's Ministry</h3>
+                    <div id="womens_ministry-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter community/outreach item...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Women's Ministry update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('community', 'Enter another community/outreach item...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('womens_ministry', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: OCC Shoebox collection week Nov 17-24</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: "Women of Worth" outdoor movie night is Sept 6th</div>
                 </div>
 
-                <!-- Prayer Requests & Pastoral Care -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">🙏</span>Prayer Requests & Pastoral Care
-                    </h3>
-                    <div id="pastoral-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🧑‍🤝‍🧑 Youth Ministry</h3>
+                    <div id="youth_ministry-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter prayer request or pastoral care note...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Youth Ministry update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('pastoral', 'Enter another prayer/pastoral note...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('youth_ministry', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Pray for upcoming Women's Retreat</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Youth Retreat to Twin Pines is Feb 21-23</div>
                 </div>
 
-                <!-- Action Items & Follow-ups -->
                 <div class="category bg-slate-50 p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-                        <span class="category-icon mr-2 text-xl">✅</span>Action Items & Follow-ups
-                    </h3>
-                    <div id="actions-inputs" class="space-y-3">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🧒 Children's Ministry</h3>
+                    <div id="childrens_ministry-inputs" class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter action item or follow-up...">
+                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Children's Ministry update...">
                         </div>
                     </div>
-                    <button type="button" onclick="addInput('actions', 'Enter another action item...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                    <button type="button" onclick="addInput('childrens_ministry', 'Enter another update...')" class="mt-4 text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add another item
                     </button>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Ken to confirm budget for A Night in Bethlehem</div>
+                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: New volunteer training is on Feb 2nd after service</div>
                 </div>
             </div>
 
@@ -235,9 +280,7 @@
                     </svg>
                     ✨ Generate Professional Meeting Notes
                 </button>
-                <button type="button" id="clearAllBtn" 
-                        class="w-full md:w-auto flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50" 
-                        onclick="requestClearAllConfirmation()">
+                <button type="button" id="clearAllBtn" class="w-full md:w-auto flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50" onclick="requestClearAllConfirmation()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
@@ -264,7 +307,7 @@
     </div>
 
     <!-- Modal for Custom Alert / Confirmation -->
-    <div id="customModal" class="modal hidden items-center justify-center"> <!-- Initially hidden, flex added by JS -->
+    <div id="customModal" class="modal hidden items-center justify-center">
         <div class="modal-content p-6 rounded-lg bg-white shadow-xl">
             <p id="customModalMessage" class="text-slate-700 text-lg mb-6"></p>
             <div class="flex justify-center gap-4">
@@ -282,7 +325,6 @@
         const customModalCancelBtn = document.getElementById('customModalCancelBtn');
         const customModalOkBtn = document.getElementById('customModalOkBtn');
 
-        // For simple alerts
         function showAlert(message) {
             customModalMessage.textContent = message;
             customModalConfirmBtn.style.display = 'none';
@@ -296,13 +338,11 @@
             customModal.classList.add('flex');
         }
 
-        // For confirmation dialogs
         function showConfirmation(message, onConfirm) {
             customModalMessage.textContent = message;
             customModalConfirmBtn.style.display = 'inline-block';
             customModalCancelBtn.style.display = 'inline-block';
             customModalOkBtn.style.display = 'none';
-
             customModalConfirmBtn.onclick = function() {
                 customModal.classList.add('hidden');
                 customModal.classList.remove('flex');
@@ -316,7 +356,6 @@
             customModal.classList.add('flex');
         }
         
-        // Close modal if user clicks outside of it
         window.onclick = function(event) {
             if (event.target == customModal) {
                 customModal.classList.add('hidden');
@@ -324,19 +363,15 @@
             }
         }
 
-        // Function to add a new input field to a category
         function addInput(categoryId, placeholderText) {
             const container = document.getElementById(categoryId + '-inputs');
             if (!container) return;
-
             const inputGroup = document.createElement('div');
             inputGroup.className = 'flex items-center space-x-2 mt-2 dynamic-input-group';
-
             const newInput = document.createElement('input');
             newInput.type = 'text';
             newInput.className = 'flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400';
             newInput.placeholder = placeholderText || 'Enter item...';
-
             const removeButton = document.createElement('button');
             removeButton.type = 'button';
             removeButton.className = 'p-2 text-red-500 hover:text-red-700 rounded-md hover:bg-red-100 transition-colors duration-150';
@@ -345,13 +380,11 @@
             removeButton.onclick = function() {
                 inputGroup.remove();
             };
-
             inputGroup.appendChild(newInput);
             inputGroup.appendChild(removeButton);
             container.appendChild(inputGroup);
-            newInput.focus(); // Auto-focus the newly added input field
+            newInput.focus();
         }
-
 
         function getNextWednesday() {
             const today = new Date();
@@ -359,7 +392,6 @@
             const daysUntilWednesday = (3 - dayOfWeek + 7) % 7;
             const nextWednesday = new Date(today);
             if (daysUntilWednesday === 0 && today.getDay() === 3) {
-                // Today is Wednesday
             } else if (daysUntilWednesday === 0) {
                 nextWednesday.setDate(today.getDate() + 7);
             } else {
@@ -369,45 +401,44 @@
         }
         
         function actualClearAllNotes() {
-            const categoryIds = ['events', 'ministries', 'facilities', 'finances', 'staff', 'community', 'pastoral', 'actions'];
+            const categoryIds = ['prayer', 'body_concerns', 'budget', 'last_sunday', 'this_sunday', 'large_events', 'small_groups', 'facilities', 'media', 'mens_ministry', 'womens_ministry', 'youth_ministry', 'childrens_ministry'];
             categoryIds.forEach(id => {
                 const inputsContainer = document.getElementById(id + '-inputs');
                 if (inputsContainer) {
-                    // Clear the first (static) input
                     const staticInput = inputsContainer.querySelector('input[type="text"]');
                     if (staticInput) {
                         staticInput.value = '';
                     }
-                    // Remove all dynamically added input groups
                     const dynamicInputs = inputsContainer.querySelectorAll('.dynamic-input-group');
                     dynamicInputs.forEach(group => group.remove());
                 }
             });
-            // Hide the output section and clear its text
             document.getElementById('outputSection').style.display = 'none';
-            document.getElementById('outputText').textContent = ''; 
-            // showAlert("All notes have been cleared."); // Optional: uncomment for a success message
+            document.getElementById('outputText').textContent = '';
         }
 
         function requestClearAllConfirmation() {
             showConfirmation("Are you sure you want to clear all notes? This action cannot be undone.", actualClearAllNotes);
         }
 
-
         function generateReport() {
             const categoryIdToName = {
-                'events': 'Upcoming Events & Programs',
-                'ministries': 'Ministry Updates',
-                'facilities': 'Facility & Maintenance',
-                'finances': 'Financial Updates',
-                'staff': 'Staff & Leadership',
-                'community': 'Community & Outreach',
-                'pastoral': 'Prayer Requests & Pastoral Care',
-                'actions': 'Action Items & Follow-ups'
+                'prayer': 'Prayer Requests',
+                'body_concerns': 'Body Concerns/Updates',
+                'budget': 'Budget',
+                'last_sunday': 'Last Sunday',
+                'this_sunday': 'This Coming Sunday',
+                'large_events': 'Large Upcoming Events',
+                'small_groups': 'Small Groups/Community',
+                'facilities': 'Facilities',
+                'media': 'Media/Communication',
+                'mens_ministry': "Men's Ministry",
+                'womens_ministry': "Women's Ministry",
+                'youth_ministry': 'Youth Ministry',
+                'childrens_ministry': "Children's Ministry"
             };
 
             const sectionsData = {};
-
             for (const id in categoryIdToName) {
                 const inputsContainer = document.getElementById(id + '-inputs');
                 if (inputsContainer) {
@@ -419,8 +450,6 @@
                         }
                     });
                     sectionsData[categoryIdToName[id]] = categoryItems.join('\n');
-                } else {
-                    sectionsData[categoryIdToName[id]] = '';
                 }
             }
 
@@ -438,11 +467,10 @@
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
-            })}\n`; // Removed extra \n here
-            reportContent += `${'-'.repeat(50)}\n\n`; // Added separator line after the date
+            })}\n\n`;
+            reportContent += `${'-'.repeat(50)}\n\n`;
 
             let isFirstActualSection = true;
-
             for (const id in categoryIdToName) {
                 const sectionName = categoryIdToName[id];
                 const content = sectionsData[sectionName];
@@ -475,14 +503,9 @@
             const outputText = document.getElementById('outputText').textContent;
             const btn = document.querySelector('.copy-btn');
             const originalButtonText = btn.innerHTML; 
-            
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(outputText).then(() => {
-                    btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Copied!`;
+                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Copied!`;
                     btn.classList.add('copied'); 
                     setTimeout(() => {
                         btn.innerHTML = originalButtonText;
@@ -509,11 +532,7 @@
             try {
                 const successful = document.execCommand('copy');
                 if (successful) {
-                    btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Copied!`;
+                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Copied!`;
                     btn.classList.add('copied');
                     setTimeout(() => {
                         btn.innerHTML = originalButtonText;
