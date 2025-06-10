@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bucks Church Weekly Meeting Notes</title>
+    <title>Bucks Church Meeting Notes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -70,19 +70,23 @@
             padding-left: 2rem; /* Adds indentation */
             list-style-type: disc; /* Ensures bullet points are visible */
         }
+        #outputText ul ul {
+            list-style-type: circle; /* For sub-bullets */
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
     <div class="container bg-white w-full max-w-3xl mx-auto rounded-xl shadow-2xl overflow-hidden fade-in">
         <!-- Header -->
         <div class="header bg-gradient-to-r from-green-500 to-emerald-600 text-white p-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Weekly Notes</h1>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Meeting Notes</h1>
             <p class="text-lg md:text-xl opacity-90">Simple Meeting Notes Generator</p>
         </div>
 
         <div class="form-container p-6 md:p-10 space-y-8">
             <!-- Instructions -->
             <div class="instructions bg-sky-50 border-l-4 border-sky-500 text-sky-700 p-6 rounded-lg shadow-sm">
+                 <div id="draft-notification-area"></div>
                 <h4 class="text-xl font-semibold mb-3 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -90,236 +94,34 @@
                     How to Use This Tool
                 </h4>
                 <ol class="list-decimal list-inside space-y-1 text-sm md:text-base">
-                    <li>Enter individual updates in the fields for each category.</li>
-                    <li>Use the "+ Add another item" button to add more updates.</li>
-                    <li>Click "Generate" to create your report.</li>
-                    <li>Copy the notes and use them in your meeting!</li>
+                    <li>Enter updates in the fields for each category.</li>
+                    <li>Use "+ Add Item" for a new bullet point and "+ Add Subpoint" for an indented bullet.</li>
+                    <li>Click "💾 Save Draft" to save your progress.</li>
+                    <li>Click "✨ Generate" to create your report.</li>
                 </ol>
             </div>
 
-            <!-- New Categories -->
-            <div class="space-y-6">
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🙏 Prayer Requests</h3>
-                    <div id="prayer-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter prayer request...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('prayer', 'Enter another prayer request...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Pray for the Smith family</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">❤️ Body Concerns/Updates</h3>
-                    <div id="body_concerns-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter concern or update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('body_concerns', 'Enter another concern...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: John B. is recovering from surgery</div>
-                </div>
-                
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">💰 Budget</h3>
-                    <div id="budget-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter budget update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('budget', 'Enter another budget update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Weekly giving was $12,500</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">⏪ Last Sunday</h3>
-                    <div id="last_sunday-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter update from last Sunday...">
-                        </div>
-                    </div>
-                     <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('last_sunday', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Attendance was 350, with 5 first-time visitors</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">⏩ This Coming Sunday</h3>
-                    <div id="this_sunday-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter plans for this Sunday...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('this_sunday', 'Enter another plan...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Pastor Ken is preaching on John 3</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🎉 Large Upcoming Events</h3>
-                    <div id="large_events-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter large event update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('large_events', 'Enter another event...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Fall Fest is on Sept 20th, need more volunteers</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🏘️ Small Groups/Community</h3>
-                    <div id="small_groups-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter small group update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('small_groups', 'Enter another group update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: The "Love & Respect" marriage group is starting a new study</div>
-                </div>
-                
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🛠️ Facilities</h3>
-                    <div id="facilities-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter facilities update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('facilities', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Sanctuary AC unit scheduled for maintenance on Tuesday</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">📱 Media/Communication</h3>
-                    <div id="media-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter media/comm update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('media', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: New website homepage is live</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">👨 Men's Ministry</h3>
-                    <div id="mens_ministry-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Men's Ministry update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('mens_ministry', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Men's Breakfast is this Saturday at 8:30am</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">👩 Women's Ministry</h3>
-                    <div id="womens_ministry-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Women's Ministry update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('womens_ministry', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: "Women of Worth" outdoor movie night is Sept 6th</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🧑‍🤝‍🧑 Youth Ministry</h3>
-                    <div id="youth_ministry-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Youth Ministry update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('youth_ministry', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: Youth Retreat to Twin Pines is Feb 21-23</div>
-                </div>
-
-                <div class="category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">🧒 Children's Ministry</h3>
-                    <div id="childrens_ministry-inputs" class="space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" class="flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400" placeholder="Enter Children's Ministry update...">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" onclick="addInput('childrens_ministry', 'Enter another update...')" class="text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Add another item
-                        </button>
-                    </div>
-                    <div class="placeholder-text text-xs text-slate-500 mt-2 italic">Example: New volunteer training is on Feb 2nd after service</div>
-                </div>
+            <!-- Categories Container -->
+            <div id="categories-container" class="space-y-6">
+                <!-- Categories will be dynamically inserted here -->
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center mt-8">
-                <button class="generate-btn w-full md:w-auto flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50" onclick="generateReport()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-                    </svg>
-                    ✨ Generate Professional Meeting Notes
+            <div class="flex flex-wrap gap-4 justify-center items-center mt-8">
+                <button class="generate-btn w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" onclick="generateReport()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+                    ✨ Generate Meeting Notes
                 </button>
-                <button type="button" id="clearAllBtn" class="w-full md:w-auto flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50" onclick="requestClearAllConfirmation()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
+                 <button type="button" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" onclick="saveDraft()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3l-4-4-4 4z" /></svg>
+                    💾 Save Draft
+                </button>
+                <button type="button" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" onclick="loadDraft()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                    📂 Load Draft
+                </button>
+                <button type="button" id="clearAllBtn" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" onclick="requestClearAllConfirmation()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                     Clear All Notes
                 </button>
             </div>
@@ -328,7 +130,7 @@
             <div class="output-section mt-10 pt-6 border-t border-slate-200" id="outputSection" style="display: none;">
                 <div class="output-container bg-slate-100 p-6 rounded-lg shadow-inner">
                     <div class="output-header flex justify-between items-center mb-4">
-                        <h3 id="outputTitle" class="text-xl font-semibold text-slate-800">📋 Your Professional Meeting Notes</h3>
+                        <h3 id="outputTitle" class="text-xl font-semibold text-slate-800">📋 Your Meeting Notes</h3>
                         <button class="copy-btn bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" onclick="copyToClipboard()">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -362,19 +164,19 @@
         const customModalOkBtn = document.getElementById('customModalOkBtn');
         
         const categoryDetails = {
-            'prayer': { name: 'Prayer Requests', emoji: '🙏' },
-            'body_concerns': { name: 'Body Concerns/Updates', emoji: '❤️' },
-            'budget': { name: 'Budget', emoji: '💰' },
-            'last_sunday': { name: 'Last Sunday', emoji: '⏪' },
-            'this_sunday': { name: 'This Coming Sunday', emoji: '⏩' },
-            'large_events': { name: 'Large Upcoming Events', emoji: '🎉' },
-            'small_groups': { name: 'Small Groups/Community', emoji: '🏘️' },
-            'facilities': { name: 'Facilities', emoji: '🛠️' },
-            'media': { name: 'Media/Communication', emoji: '📱' },
-            'mens_ministry': { name: "Men's Ministry", emoji: '👨' },
-            'womens_ministry': { name: "Women's Ministry", emoji: '👩' },
-            'youth_ministry': { name: 'Youth Ministry', emoji: '🧑‍🤝‍🧑' },
-            'childrens_ministry': { name: "Children's Ministry", emoji: '🧒' }
+            'prayer': { name: 'Prayer Requests', emoji: '🙏', placeholder: 'Enter prayer request...' },
+            'body_concerns': { name: 'Body Concerns/Updates', emoji: '❤️', placeholder: 'Enter concern or update...' },
+            'budget': { name: 'Budget', emoji: '💰', placeholder: 'Enter budget update...' },
+            'last_sunday': { name: 'Last Sunday', emoji: '⏪', placeholder: 'Enter update from last Sunday...' },
+            'this_sunday': { name: 'This Coming Sunday', emoji: '⏩', placeholder: 'Enter plans for this Sunday...' },
+            'large_events': { name: 'Large Upcoming Events', emoji: '🎉', placeholder: 'Enter large event update...' },
+            'small_groups': { name: 'Small Groups/Community', emoji: '🏘️', placeholder: 'Enter small group update...' },
+            'facilities': { name: 'Facilities', emoji: '🛠️', placeholder: 'Enter facilities update...' },
+            'media': { name: 'Media/Communication', emoji: '📱', placeholder: 'Enter media/comm update...' },
+            'mens_ministry': { name: "Men's Ministry", emoji: '👨', placeholder: "Enter Men's Ministry update..." },
+            'womens_ministry': { name: "Women's Ministry", emoji: '👩', placeholder: "Enter Women's Ministry update..." },
+            'youth_ministry': { name: 'Youth Ministry', emoji: '🧑‍🤝‍🧑', placeholder: 'Enter Youth Ministry update...' },
+            'childrens_ministry': { name: "Children's Ministry", emoji: '🧒', placeholder: "Enter Children's Ministry update..." }
         };
 
         function showAlert(message) {
@@ -415,28 +217,74 @@
             }
         }
 
-        function addInput(categoryId, placeholderText) {
-            const container = document.getElementById(categoryId + '-inputs');
-            if (!container) return;
+        function addMainItem(container, placeholder) {
+            const itemWrapper = document.createElement('div');
+            itemWrapper.className = 'main-item-wrapper mt-2';
+
             const inputGroup = document.createElement('div');
-            inputGroup.className = 'flex items-center space-x-2 mt-2 dynamic-input-group';
+            inputGroup.className = 'flex items-center space-x-2';
+            
             const newInput = document.createElement('input');
             newInput.type = 'text';
-            newInput.className = 'flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400';
-            newInput.placeholder = placeholderText || 'Enter item...';
+            newInput.className = 'main-point flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400';
+            newInput.placeholder = placeholder;
+
             const removeButton = document.createElement('button');
             removeButton.type = 'button';
             removeButton.className = 'p-2 text-red-500 hover:text-red-700 rounded-md hover:bg-red-100 transition-colors duration-150';
             removeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`;
-            removeButton.setAttribute('aria-label', 'Remove item');
-            removeButton.onclick = function() {
-                inputGroup.remove();
-            };
+            removeButton.onclick = () => itemWrapper.remove();
+            
             inputGroup.appendChild(newInput);
             inputGroup.appendChild(removeButton);
-            container.appendChild(inputGroup);
+            itemWrapper.appendChild(inputGroup);
+
+            const subpointButton = document.createElement('button');
+            subpointButton.type = 'button';
+            subpointButton.className = "add-subpoint-btn ml-8 mt-1 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center";
+            subpointButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg> Add Subpoint`;
+            subpointButton.onclick = () => addSubItem(itemWrapper, 'Enter subpoint...');
+            
+            itemWrapper.appendChild(subpointButton);
+            container.appendChild(itemWrapper);
+            newInput.focus();
+            return itemWrapper;
+        }
+
+        function addSubItem(parentWrapper, placeholder) {
+            const existingSubpointBtn = parentWrapper.querySelector('.add-subpoint-btn');
+            if (existingSubpointBtn) {
+                existingSubpointBtn.remove();
+            }
+
+            const subItemGroup = document.createElement('div');
+            subItemGroup.className = 'sub-item-group ml-8 mt-2 flex items-center space-x-2';
+            
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.className = 'sub-point flex-grow p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm placeholder-slate-400';
+            newInput.placeholder = placeholder;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'p-2 text-red-500 hover:text-red-700 rounded-md hover:bg-red-100 transition-colors duration-150';
+            removeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`;
+            removeButton.onclick = () => subItemGroup.remove();
+
+            subItemGroup.appendChild(newInput);
+            subItemGroup.appendChild(removeButton);
+            parentWrapper.appendChild(subItemGroup);
+
+            const newSubpointButton = document.createElement('button');
+            newSubpointButton.type = 'button';
+            newSubpointButton.className = "add-subpoint-btn ml-8 mt-1 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center";
+            newSubpointButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg> Add Subpoint`;
+            newSubpointButton.onclick = () => addSubItem(parentWrapper, 'Enter subpoint...');
+            parentWrapper.appendChild(newSubpointButton);
+
             newInput.focus();
         }
+
 
         function getNextWednesday() {
             const today = new Date();
@@ -453,16 +301,11 @@
         }
         
         function actualClearAllNotes() {
-            const categoryIds = Object.keys(categoryDetails);
-            categoryIds.forEach(id => {
+            Object.keys(categoryDetails).forEach(id => {
                 const inputsContainer = document.getElementById(id + '-inputs');
                 if (inputsContainer) {
-                    const staticInput = inputsContainer.querySelector('input[type="text"]');
-                    if (staticInput) {
-                        staticInput.value = '';
-                    }
-                    const dynamicInputs = inputsContainer.querySelectorAll('.dynamic-input-group');
-                    dynamicInputs.forEach(group => group.remove());
+                    inputsContainer.innerHTML = '';
+                    addMainItem(inputsContainer, categoryDetails[id].placeholder);
                 }
             });
             document.getElementById('outputSection').style.display = 'none';
@@ -470,70 +313,76 @@
         }
 
         function requestClearAllConfirmation() {
-            showConfirmation("Are you sure you want to clear all notes? This action cannot be undone.", actualClearAllNotes);
+            showConfirmation("Are you sure you want to clear all notes? This action cannot be undone.", () => {
+                actualClearAllNotes();
+                localStorage.removeItem('meetingNotesDraft');
+                showAlert("All notes have been cleared.");
+            });
         }
 
         function generateReport() {
-            const sectionsData = {};
+            let hasContent = false;
+            let reportHtml = `<div style="font-size: 1.3em; font-weight: bold;">Bucks Church | Staff Meeting Notes</div>`;
+            reportHtml += `<div>${getNextWednesday().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div><br>`;
+            reportHtml += `<hr><br>`;
+            let isFirstActualSection = true;
+
             for (const id in categoryDetails) {
+                const details = categoryDetails[id];
+                const sectionName = details.name;
+                const emoji = details.emoji;
                 const inputsContainer = document.getElementById(id + '-inputs');
-                if (inputsContainer) {
-                    const inputElements = inputsContainer.querySelectorAll('input[type="text"]');
-                    let categoryItems = [];
-                    inputElements.forEach(input => {
-                        if (input.value.trim() !== '') {
-                            categoryItems.push(input.value.trim());
+                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
+
+                let sectionContent = '';
+                mainItemWrappers.forEach(wrapper => {
+                    const mainPointInput = wrapper.querySelector('.main-point');
+                    const subPointInputs = wrapper.querySelectorAll('.sub-point');
+                    
+                    if (mainPointInput && mainPointInput.value.trim() !== '') {
+                        hasContent = true;
+                        sectionContent += `<li>${mainPointInput.value.trim()}`;
+                        
+                        let subList = '<ul>';
+                        let hasSubpoints = false;
+                        subPointInputs.forEach(subInput => {
+                            if (subInput.value.trim() !== '') {
+                                hasSubpoints = true;
+                                subList += `<li>${subInput.value.trim()}</li>`;
+                            }
+                        });
+                        subList += '</ul>';
+
+                        if (hasSubpoints) {
+                            sectionContent += subList;
                         }
-                    });
-                    sectionsData[categoryDetails[id].name] = categoryItems;
+                        sectionContent += '</li>';
+                    }
+                });
+
+                if (sectionContent) {
+                    if (!isFirstActualSection) {
+                        reportHtml += '<br>';
+                    }
+                    reportHtml += `<div><b>${emoji} ${sectionName.toUpperCase()}</b></div>`;
+                    reportHtml += `<ul>${sectionContent}</ul>`;
+                    isFirstActualSection = false;
                 }
             }
 
-            const hasContent = Object.values(sectionsData).some(value => value && value.length > 0);
-            
             if (!hasContent) {
                 showAlert('Please fill in at least one item in any category before generating the report.'); 
                 return;
             }
 
-            let reportHtml = `<div style="font-size: 1.3em; font-weight: bold;">Bucks Church | Staff Meeting Notes</div>`;
-            reportHtml += `<div>${getNextWednesday().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            })}</div><br>`;
-            reportHtml += `<hr><br>`;
-
-            let isFirstActualSection = true;
-            for (const id in categoryDetails) {
-                const details = categoryDetails[id];
-                const sectionName = details.name;
-                const emoji = details.emoji;
-                const contentItems = sectionsData[sectionName];
-                if (contentItems && contentItems.length > 0) {
-                    if (!isFirstActualSection) {
-                        reportHtml += `<br>`; 
-                    }
-                    reportHtml += `<div><b>${emoji} ${sectionName.toUpperCase()}</b></div>`;
-                    reportHtml += '<ul>';
-                    contentItems.forEach(item => {
-                        reportHtml += `<li>${item}</li>`;
-                    });
-                    reportHtml += '</ul>';
-                    isFirstActualSection = false;
-                }
-            }
-            
             const outputDiv = document.getElementById('outputText');
             outputDiv.innerHTML = reportHtml;
-
             const outputSection = document.getElementById('outputSection');
             outputSection.style.display = 'block';
             outputSection.classList.add('fade-in'); 
             outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-
+        
         function copyToClipboard() {
             const outputDiv = document.getElementById('outputText');
             const btn = document.querySelector('.copy-btn');
@@ -556,6 +405,110 @@
                 btn.classList.remove('copied'); 
             }, 2000);
         }
+
+        function saveDraft() {
+            const draftData = {};
+            for(const id in categoryDetails) {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
+                draftData[id] = [];
+                mainItemWrappers.forEach(wrapper => {
+                    const mainPointInput = wrapper.querySelector('.main-point');
+                    const subPointInputs = wrapper.querySelectorAll('.sub-point');
+                    if(mainPointInput && mainPointInput.value.trim()) {
+                        const mainItem = {
+                            text: mainPointInput.value,
+                            subpoints: []
+                        };
+                        subPointInputs.forEach(subInput => {
+                             if(subInput.value.trim()) {
+                                 mainItem.subpoints.push(subInput.value);
+                             }
+                        });
+                        draftData[id].push(mainItem);
+                    }
+                });
+            }
+            localStorage.setItem('meetingNotesDraft', JSON.stringify(draftData));
+            showAlert('Draft saved successfully!');
+        }
+
+        function loadDraft() {
+            const draftData = localStorage.getItem('meetingNotesDraft');
+            if(!draftData) {
+                showAlert('No saved draft found.');
+                return;
+            }
+            
+            const parsedData = JSON.parse(draftData);
+            
+            for(const id in categoryDetails) {
+                 const inputsContainer = document.getElementById(id + '-inputs');
+                 inputsContainer.innerHTML = ''; // Clear existing inputs
+            }
+
+            for(const id in parsedData) {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                const items = parsedData[id];
+
+                if(items.length === 0) {
+                     addMainItem(inputsContainer, categoryDetails[id].placeholder);
+                } else {
+                    items.forEach(itemData => {
+                        const itemWrapper = addMainItem(inputsContainer, categoryDetails[id].placeholder);
+                        const mainInput = itemWrapper.querySelector('.main-point');
+                        mainInput.value = itemData.text;
+
+                        itemData.subpoints.forEach(subpointText => {
+                            addSubItem(itemWrapper, 'Enter subpoint...');
+                            const subInputs = itemWrapper.querySelectorAll('.sub-point');
+                            const lastSubInput = subInputs[subInputs.length - 1];
+                            lastSubInput.value = subpointText;
+                        });
+                    });
+                }
+            }
+             showAlert('Draft loaded successfully!');
+             document.getElementById('draft-notification-area').innerHTML = ''; // Clear notification
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('categories-container');
+            for (const id in categoryDetails) {
+                const details = categoryDetails[id];
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200';
+                categoryElement.innerHTML = `
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">${details.emoji} ${details.name}</h3>
+                    <div id="${id}-inputs" class="space-y-3"></div>
+                    <div class="flex items-center gap-4 mt-4">
+                        <button type="button" class="add-item-btn text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            Add Item
+                        </button>
+                    </div>
+                `;
+                container.appendChild(categoryElement);
+
+                const inputsContainer = document.getElementById(`${id}-inputs`);
+                const addItemBtn = categoryElement.querySelector('.add-item-btn');
+                
+                addItemBtn.addEventListener('click', () => addMainItem(inputsContainer, details.placeholder));
+                addMainItem(inputsContainer, details.placeholder);
+            }
+
+             if (localStorage.getItem('meetingNotesDraft')) {
+                const notificationArea = document.getElementById('draft-notification-area');
+                notificationArea.innerHTML = `
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+                        <p class="font-bold">Saved Draft Found</p>
+                        <p>You have a previously saved draft. Click "Load Draft" to restore it.</p>
+                    </div>
+                `;
+            }
+        });
+
     </script>
 </body>
 </html>
