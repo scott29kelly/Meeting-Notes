@@ -162,7 +162,65 @@
         const customModalConfirmBtn = document.getElementById('customModalConfirmBtn');
         const customModalCancelBtn = document.getElementById('customModalCancelBtn');
         const customModalOkBtn = document.getElementById('customModalOkBtn');
-        
+
+        // Sanitize HTML to prevent XSS attacks
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Auto-save functionality
+        let autoSaveTimeout;
+        function scheduleAutoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveDraftSilent();
+            }, 2000);
+        }
+
+        function saveDraftSilent() {
+            const draftData = {};
+            for(const id in categoryDetails) {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                if (!inputsContainer) continue;
+                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
+                draftData[id] = [];
+                mainItemWrappers.forEach(wrapper => {
+                    const mainPointInput = wrapper.querySelector('.main-point');
+                    const subPointInputs = wrapper.querySelectorAll('.sub-point');
+                    if(mainPointInput && mainPointInput.value.trim()) {
+                        const mainItem = {
+                            text: mainPointInput.value,
+                            subpoints: []
+                        };
+                        subPointInputs.forEach(subInput => {
+                             if(subInput.value.trim()) {
+                                 mainItem.subpoints.push(subInput.value);
+                             }
+                        });
+                        draftData[id].push(mainItem);
+                    }
+                });
+            }
+            localStorage.setItem('meetingNotesDraft', JSON.stringify(draftData));
+        }
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !customModal.classList.contains('hidden')) {
+                customModal.classList.add('hidden');
+                customModal.classList.remove('flex');
+            }
+        });
+
+        // Listen for input changes to trigger auto-save
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('.main-point, .sub-point')) {
+                scheduleAutoSave();
+            }
+        });
+
         const categoryDetails = {
             'prayer': { name: 'Prayer Requests', emoji: '🙏', placeholder: 'Enter prayer request...' },
             'body_concerns': { name: 'Body Concerns/Updates', emoji: '❤️', placeholder: 'Enter concern or update...' },
@@ -341,14 +399,14 @@
                     
                     if (mainPointInput && mainPointInput.value.trim() !== '') {
                         hasContent = true;
-                        sectionContent += `<li>${mainPointInput.value.trim()}`;
-                        
+                        sectionContent += `<li>${sanitizeHTML(mainPointInput.value.trim())}`;
+
                         let subList = '<ul>';
                         let hasSubpoints = false;
                         subPointInputs.forEach(subInput => {
                             if (subInput.value.trim() !== '') {
                                 hasSubpoints = true;
-                                subList += `<li>${subInput.value.trim()}</li>`;
+                                subList += `<li>${sanitizeHTML(subInput.value.trim())}</li>`;
                             }
                         });
                         subList += '</ul>';
@@ -383,27 +441,40 @@
             outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         
-        function copyToClipboard() {
+        async function copyToClipboard() {
             const outputDiv = document.getElementById('outputText');
             const btn = document.querySelector('.copy-btn');
             const originalButtonText = btn.innerHTML;
-            
-            const listener = function(ev) {
-                ev.preventDefault();
-                ev.clipboardData.setData('text/html', outputDiv.innerHTML);
-                ev.clipboardData.setData('text/plain', outputDiv.innerText);
-            };
 
-            document.addEventListener('copy', listener);
-            document.execCommand('copy');
-            document.removeEventListener('copy', listener);
+            try {
+                // Modern Clipboard API with HTML support
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'text/html': new Blob([outputDiv.innerHTML], { type: 'text/html' }),
+                        'text/plain': new Blob([outputDiv.innerText], { type: 'text/plain' })
+                    })
+                ]);
 
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Copied!`;
-            btn.classList.add('copied'); 
-            setTimeout(() => {
-                btn.innerHTML = originalButtonText;
-                btn.classList.remove('copied'); 
-            }, 2000);
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Copied!`;
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = originalButtonText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                // Fallback for browsers that don't support ClipboardItem
+                try {
+                    await navigator.clipboard.writeText(outputDiv.innerText);
+                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Copied!`;
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.innerHTML = originalButtonText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                } catch (fallbackErr) {
+                    showAlert('Failed to copy. Please try selecting the text manually.');
+                }
+            }
         }
 
         function saveDraft() {
