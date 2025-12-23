@@ -255,6 +255,56 @@
         // Performance: Pre-compute category keys
         const categoryKeys = Object.keys(categoryDetails);
 
+        // Security: Sanitize HTML to prevent XSS attacks
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Auto-save functionality
+        let autoSaveTimeout;
+        function scheduleAutoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveDraftSilent();
+            }, 2000);
+        }
+
+        function saveDraftSilent() {
+            const draftData = {};
+            for (const id of categoryKeys) {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                if (!inputsContainer) continue;
+                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
+                draftData[id] = [];
+                mainItemWrappers.forEach(wrapper => {
+                    const mainPointInput = wrapper.querySelector('.main-point');
+                    if (mainPointInput?.value.trim()) {
+                        const subpoints = Array.from(wrapper.querySelectorAll('.sub-point'))
+                            .filter(sub => sub.value.trim())
+                            .map(sub => sub.value);
+                        draftData[id].push({ text: mainPointInput.value, subpoints });
+                    }
+                });
+            }
+            localStorage.setItem('meetingNotesDraft', JSON.stringify(draftData));
+        }
+
+        // Listen for input changes to trigger auto-save
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('.main-point, .sub-point')) {
+                scheduleAutoSave();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !DOM.modal.classList.contains('hidden')) {
+                hideModal();
+            }
+        });
+
         // Modal functions
         function showModal(isAlert) {
             DOM.modalConfirmBtn.classList.toggle('hidden', isAlert);
@@ -420,11 +470,11 @@
                     
                     if (mainPointInput?.value.trim()) {
                         hasContent = true;
-                        sectionContent += `<li>${mainPointInput.value.trim()}`;
-                        
+                        sectionContent += `<li>${sanitizeHTML(mainPointInput.value.trim())}`;
+
                         const subItems = Array.from(subPointInputs)
                             .filter(sub => sub.value.trim())
-                            .map(sub => `<li>${sub.value.trim()}</li>`)
+                            .map(sub => `<li>${sanitizeHTML(sub.value.trim())}</li>`)
                             .join('');
                         
                         if (subItems) {
