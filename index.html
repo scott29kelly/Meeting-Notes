@@ -442,6 +442,7 @@
 
         function requestClearAllConfirmation() {
             showConfirmation("Are you sure you want to clear all notes? This action cannot be undone.", () => {
+                clearTimeout(autoSaveTimeout); // Cancel any pending auto-save
                 actualClearAllNotes();
                 localStorage.removeItem('meetingNotesDraft');
                 showAlert("All notes have been cleared.");
