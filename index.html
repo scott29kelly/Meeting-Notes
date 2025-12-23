@@ -111,6 +111,29 @@
         .icon { display: inline-block; width: 1.25rem; height: 1.25rem; }
         .icon-sm { width: 1rem; height: 1rem; }
         .icon-lg { width: 1.5rem; height: 1.5rem; }
+
+        /* Drag and drop styles */
+        .drag-handle {
+            cursor: grab;
+            color: #94a3b8;
+            padding: 0.5rem;
+            transition: color 0.15s;
+        }
+        .drag-handle:hover {
+            color: #64748b;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .main-item-wrapper.dragging {
+            opacity: 0.5;
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+        }
+        .main-item-wrapper.drag-over {
+            border-top: 2px solid #22c55e;
+            padding-top: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
@@ -140,6 +163,14 @@
             </symbol>
             <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </symbol>
+            <symbol id="icon-drag" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="9" cy="6" r="1.5"/>
+                <circle cx="15" cy="6" r="1.5"/>
+                <circle cx="9" cy="12" r="1.5"/>
+                <circle cx="15" cy="12" r="1.5"/>
+                <circle cx="9" cy="18" r="1.5"/>
+                <circle cx="15" cy="18" r="1.5"/>
             </symbol>
         </defs>
     </svg>
@@ -365,22 +396,83 @@
             return btn;
         }
 
+        function createDragHandle() {
+            const handle = document.createElement('div');
+            handle.className = 'drag-handle flex-shrink-0';
+            handle.innerHTML = '<svg class="icon"><use href="#icon-drag"/></svg>';
+            handle.title = 'Drag to reorder';
+            return handle;
+        }
+
+        // Drag and drop state
+        let draggedItem = null;
+
+        function setupDragListeners(itemWrapper) {
+            itemWrapper.addEventListener('dragstart', (e) => {
+                draggedItem = itemWrapper;
+                itemWrapper.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            itemWrapper.addEventListener('dragend', () => {
+                itemWrapper.classList.remove('dragging');
+                draggedItem = null;
+                // Remove drag-over class from all items
+                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            });
+
+            itemWrapper.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (draggedItem && draggedItem !== itemWrapper) {
+                    const container = itemWrapper.parentNode;
+                    if (container === draggedItem.parentNode) {
+                        itemWrapper.classList.add('drag-over');
+                    }
+                }
+            });
+
+            itemWrapper.addEventListener('dragleave', () => {
+                itemWrapper.classList.remove('drag-over');
+            });
+
+            itemWrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                itemWrapper.classList.remove('drag-over');
+                if (draggedItem && draggedItem !== itemWrapper) {
+                    const container = itemWrapper.parentNode;
+                    if (container === draggedItem.parentNode) {
+                        // Insert dragged item before the drop target
+                        container.insertBefore(draggedItem, itemWrapper);
+                        scheduleAutoSave();
+                    }
+                }
+            });
+        }
+
         function addMainItem(container, placeholder) {
             const itemWrapper = document.createElement('div');
             itemWrapper.className = 'main-item-wrapper mt-2';
+            itemWrapper.draggable = true;
 
             const inputGroup = document.createElement('div');
             inputGroup.className = 'flex items-center space-x-2';
-            
-            const newInput = createInputElement('text', 
+
+            const dragHandle = createDragHandle();
+
+            const newInput = createInputElement('text',
                 'main-point flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400',
                 placeholder);
 
+            inputGroup.appendChild(dragHandle);
             inputGroup.appendChild(newInput);
             inputGroup.appendChild(createRemoveButton(() => itemWrapper.remove()));
             itemWrapper.appendChild(inputGroup);
             itemWrapper.appendChild(createSubpointButton(itemWrapper, 'Enter subpoint...'));
             container.appendChild(itemWrapper);
+
+            // Add drag event listeners
+            setupDragListeners(itemWrapper);
             
             // Performance: Use requestAnimationFrame for focus to avoid layout thrashing
             requestAnimationFrame(() => newInput.focus());
