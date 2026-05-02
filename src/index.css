@@ -1,0 +1,284 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: oklch(0.985 0.005 85);
+  --paper-rule: oklch(0.92 0.012 85);
+  --ink: oklch(0.20 0.018 245);
+  --ink-soft: oklch(0.42 0.018 245);
+  --ink-faint: oklch(0.58 0.014 245);
+  --accent: oklch(0.45 0.13 25);
+  --accent-soft: oklch(0.94 0.025 25);
+  --surface-aged: oklch(0.965 0.012 80);
+  --success: oklch(0.55 0.10 155);
+  --danger: oklch(0.50 0.16 25);
+  --focus-ring: oklch(0.55 0.16 245);
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4.5rem;
+  --space-12: 6rem;
+
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Geist', system-ui, sans-serif;
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  button {
+    font-family: inherit;
+    color: inherit;
+  }
+
+  input,
+  textarea {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+  }
+
+  textarea {
+    resize: none;
+  }
+}
+
+@layer utilities {
+  .text-mono-label {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .ruled-input {
+    width: 100%;
+    padding: var(--space-3) 0;
+    border: none;
+    border-bottom: 1px solid var(--paper-rule);
+    transition:
+      border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ruled-input::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .ruled-input:hover {
+    border-bottom-color: var(--ink-soft);
+  }
+
+  .ruled-input:focus {
+    border-bottom-color: var(--accent);
+    outline: none;
+  }
+
+  .quiet-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) 0;
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .quiet-button:hover {
+    color: var(--ink);
+  }
+
+  .quiet-button:disabled {
+    color: var(--ink-faint);
+    cursor: not-allowed;
+  }
+
+  .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+    border-radius: 4px;
+    transition:
+      color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .icon-button:hover {
+    color: var(--danger);
+    background-color: var(--accent-soft);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background-color: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--paper-rule);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--surface-aged);
+    border-color: var(--ink-soft);
+  }
+
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--danger);
+    color: var(--paper);
+    border: 1px solid var(--danger);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-danger:hover {
+    background-color: oklch(0.42 0.18 25);
+  }
+
+  .toolbar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+    font-size: var(--text-xs);
+    background: transparent;
+    border: none;
+    padding: var(--space-2) 0;
+    cursor: pointer;
+    transition: color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .toolbar-link:hover {
+    color: var(--ink);
+  }
+}
+
+dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+dialog::backdrop {
+  background-color: oklch(0.20 0.018 245 / 0.32);
+  animation: backdrop-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+@media print {
+  body {
+    background: var(--paper);
+  }
+}
