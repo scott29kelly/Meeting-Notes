@@ -1,31 +1,1174 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Bucks Church staff meeting notes. Capture weekly updates, generate the agenda, paste into the team thread."
-    />
-    <meta name="theme-color" content="#f7f5f0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Bucks Church Meeting Notes</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f7f4ee'/%3E%3Cpath d='M18 15h28v34H18z' fill='none' stroke='%23342f2c' stroke-width='4'/%3E%3Cpath d='M24 25h16M24 33h16M24 41h11' stroke='%23803a2a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+    <style>
+        :root {
+            color-scheme: light;
+            --paper: oklch(0.985 0.006 84);
+            --surface: oklch(0.965 0.008 84);
+            --surface-raised: oklch(0.995 0.004 84);
+            --surface-warn: oklch(0.955 0.035 72);
+            --rule: oklch(0.84 0.012 84);
+            --rule-strong: oklch(0.70 0.018 84);
+            --ink: oklch(0.22 0.018 245);
+            --ink-muted: oklch(0.43 0.015 245);
+            --ink-faint: oklch(0.56 0.012 245);
+            --accent: oklch(0.43 0.105 32);
+            --accent-soft: oklch(0.93 0.026 32);
+            --success: oklch(0.48 0.095 154);
+            --success-soft: oklch(0.94 0.030 154);
+            --danger: oklch(0.47 0.135 25);
+            --danger-soft: oklch(0.94 0.034 25);
+            --warning: oklch(0.55 0.09 72);
+            --focus: oklch(0.53 0.13 250);
+            --shadow-modal: 0 24px 80px oklch(0.22 0.018 245 / 0.18);
+            --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --font-doc: Georgia, Cambria, "Times New Roman", serif;
+            --font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-8: 3rem;
+            --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&display=swap"
-    />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&display=swap"
-    />
+        * {
+            box-sizing: border-box;
+        }
 
-    <title>Bucks Church &middot; Staff Meeting Notes</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+        html {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-ui);
+            font-size: 16px;
+            line-height: 1.55;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                linear-gradient(90deg, transparent 31px, oklch(0.90 0.018 32 / 0.32) 32px, transparent 33px),
+                linear-gradient(var(--paper) 0, var(--paper) 100%);
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            min-height: 44px;
+        }
+
+        button,
+        a,
+        input {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :focus {
+            outline: none;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 3px;
+        }
+
+        .skip-link {
+            position: fixed;
+            left: var(--space-4);
+            top: var(--space-4);
+            z-index: 20;
+            transform: translateY(-160%);
+            border-radius: var(--radius-md);
+            background: var(--ink);
+            color: var(--paper);
+            padding: var(--space-3) var(--space-4);
+            text-decoration: none;
+            transition: transform 160ms var(--ease-out);
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        .app-shell {
+            display: grid;
+            gap: var(--space-5);
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: var(--space-4);
+        }
+
+        .masthead {
+            display: grid;
+            gap: var(--space-4);
+            border-bottom: 1px solid var(--rule);
+            padding: var(--space-4) 0 var(--space-5);
+        }
+
+        .eyebrow {
+            margin: 0;
+            color: var(--ink-muted);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            max-width: 12ch;
+            font-family: var(--font-doc);
+            font-size: 2.25rem;
+            line-height: 1.08;
+            letter-spacing: 0;
+        }
+
+        .masthead-copy {
+            max-width: 62ch;
+            color: var(--ink-muted);
+        }
+
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            align-items: center;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 32px;
+            border: 1px solid var(--rule);
+            border-radius: 999px;
+            background: var(--surface-raised);
+            color: var(--ink-muted);
+            font-size: 0.875rem;
+            padding: var(--space-1) var(--space-3);
+        }
+
+        .workspace {
+            display: grid;
+            gap: var(--space-5);
+        }
+
+        .editor,
+        .preview-panel {
+            min-width: 0;
+        }
+
+        .toolbar {
+            display: grid;
+            gap: var(--space-3);
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-lg);
+            background: var(--surface-raised);
+            padding: var(--space-4);
+        }
+
+        .toolbar-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-2);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            width: 100%;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 700;
+            line-height: 1.2;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            transition:
+                background-color 180ms var(--ease-out),
+                border-color 180ms var(--ease-out),
+                color 180ms var(--ease-out),
+                transform 180ms var(--ease-out);
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        .button:disabled {
+            cursor: not-allowed;
+            opacity: 0.56;
+            transform: none;
+        }
+
+        .button:disabled:hover {
+            border-color: var(--rule);
+            background: var(--surface-raised);
+            color: var(--ink);
+        }
+
+        .button-primary {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .button-primary:hover {
+            background: var(--accent);
+        }
+
+        .button-secondary {
+            border-color: var(--rule);
+            background: var(--surface-raised);
+            color: var(--ink);
+        }
+
+        .button-secondary:hover {
+            border-color: var(--rule-strong);
+            background: var(--surface);
+        }
+
+        .button-danger {
+            border-color: var(--danger);
+            background: var(--danger);
+            color: var(--paper);
+        }
+
+        .button-danger:hover {
+            background: oklch(0.40 0.13 25);
+        }
+
+        .quiet-button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            min-height: 44px;
+            border: 0;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 700;
+            padding: var(--space-2) var(--space-1);
+            text-align: left;
+        }
+
+        .quiet-button:hover {
+            color: var(--ink);
+        }
+
+        .remove-button {
+            flex: 0 0 auto;
+            min-width: 44px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            background: transparent;
+            color: var(--ink-muted);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .remove-button:hover {
+            border-color: var(--danger-soft);
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .feedback {
+            display: none;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-md);
+            padding: var(--space-3) var(--space-4);
+        }
+
+        .feedback[data-visible="true"] {
+            display: block;
+        }
+
+        .feedback-warning {
+            border-color: oklch(0.76 0.052 72);
+            background: var(--surface-warn);
+            color: oklch(0.32 0.065 72);
+        }
+
+        .feedback-success {
+            border-color: oklch(0.75 0.050 154);
+            background: var(--success-soft);
+            color: oklch(0.28 0.070 154);
+        }
+
+        .category-list {
+            display: grid;
+            gap: 0;
+            margin-top: var(--space-5);
+            border-top: 1px solid var(--rule);
+        }
+
+        .category {
+            display: grid;
+            gap: var(--space-4);
+            border-bottom: 1px solid var(--rule);
+            padding: var(--space-5) 0;
+        }
+
+        .category-header {
+            display: grid;
+            gap: var(--space-1);
+        }
+
+        .category-kicker {
+            color: var(--ink-muted);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .category-title {
+            color: var(--ink);
+            font-size: 1.125rem;
+            line-height: 1.25;
+        }
+
+        .category-body {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .note-row {
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .field-row {
+            display: flex;
+            gap: var(--space-2);
+            align-items: flex-start;
+        }
+
+        .field-control {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: var(--space-1);
+            color: var(--ink-muted);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-md);
+            background:
+                linear-gradient(to bottom, transparent calc(100% - 1px), oklch(0.89 0.014 84) calc(100% - 1px)),
+                var(--surface-raised);
+            color: var(--ink);
+            padding: 0.68rem 0.8rem;
+            transition:
+                background-color 180ms var(--ease-out),
+                border-color 180ms var(--ease-out);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--ink-faint);
+            opacity: 1;
+        }
+
+        input[type="text"]:hover {
+            border-color: var(--rule-strong);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            background-color: var(--surface-raised);
+        }
+
+        .subpoint-list {
+            display: grid;
+            gap: var(--space-2);
+            padding-left: var(--space-5);
+        }
+
+        .preview-panel {
+            display: grid;
+            gap: var(--space-4);
+            align-content: start;
+        }
+
+        .preview-card {
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            padding: var(--space-3);
+        }
+
+        .preview-page {
+            min-height: 320px;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-md);
+            background: var(--surface-raised);
+            color: var(--ink);
+            font-family: var(--font-doc);
+            padding: var(--space-5);
+        }
+
+        .preview-empty {
+            display: grid;
+            min-height: 240px;
+            place-items: center;
+            color: var(--ink-muted);
+            font-family: var(--font-ui);
+            text-align: center;
+        }
+
+        .preview-output {
+            display: none;
+        }
+
+        .preview-output[data-visible="true"] {
+            display: block;
+        }
+
+        .preview-output h2 {
+            margin-bottom: var(--space-1);
+            font-size: 1.7rem;
+            line-height: 1.18;
+        }
+
+        .preview-output .date-line {
+            margin-bottom: var(--space-4);
+            color: var(--ink-muted);
+            font-family: var(--font-ui);
+            font-size: 0.95rem;
+        }
+
+        .preview-output hr {
+            height: 1px;
+            border: 0;
+            background: var(--rule);
+            margin: var(--space-4) 0;
+        }
+
+        .preview-output h3 {
+            margin: var(--space-5) 0 var(--space-2);
+            font-family: var(--font-ui);
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .preview-output ul {
+            margin: 0;
+            padding-left: var(--space-5);
+        }
+
+        .preview-output li + li {
+            margin-top: var(--space-1);
+        }
+
+        .toast {
+            position: fixed;
+            left: max(var(--space-4), env(safe-area-inset-left));
+            bottom: max(var(--space-4), env(safe-area-inset-bottom));
+            z-index: 10;
+            max-width: min(28rem, calc(100vw - 2rem));
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-md);
+            background: var(--surface-raised);
+            color: var(--ink);
+            opacity: 0;
+            padding: var(--space-3) var(--space-4);
+            transform: translateY(10px);
+            transition:
+                opacity 180ms var(--ease-out),
+                transform 180ms var(--ease-out);
+            visibility: hidden;
+        }
+
+        .toast[data-visible="true"] {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        dialog {
+            width: min(30rem, calc(100vw - 2rem));
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-lg);
+            background: var(--surface-raised);
+            color: var(--ink);
+            box-shadow: var(--shadow-modal);
+            padding: 0;
+        }
+
+        dialog::backdrop {
+            background: oklch(0.22 0.018 245 / 0.18);
+        }
+
+        .dialog-body {
+            display: grid;
+            gap: var(--space-4);
+            padding: var(--space-5);
+        }
+
+        .dialog-actions {
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .dialog-title {
+            font-size: 1.25rem;
+            line-height: 1.25;
+        }
+
+        .dialog-copy {
+            color: var(--ink-muted);
+        }
+
+        @media (min-width: 680px) {
+            .app-shell {
+                padding: var(--space-6);
+            }
+
+            .masthead {
+                grid-template-columns: minmax(18rem, 0.8fr) minmax(20rem, 1.2fr);
+                align-items: end;
+            }
+
+            .toolbar-actions,
+            .dialog-actions {
+                grid-template-columns: repeat(4, auto);
+                justify-content: start;
+            }
+
+            .button {
+                width: auto;
+            }
+        }
+
+        @media (min-width: 1060px) {
+            .app-shell {
+                padding: var(--space-8);
+            }
+
+            .workspace {
+                grid-template-columns: minmax(0, 1.35fr) minmax(22rem, 0.8fr);
+                align-items: start;
+            }
+
+            .preview-panel {
+                position: sticky;
+                top: var(--space-5);
+            }
+
+            .preview-page {
+                max-height: calc(100vh - 13rem);
+                overflow: auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#meeting-form">Skip to note entry</a>
+
+    <div class="app-shell">
+        <header class="masthead">
+            <div>
+                <p class="eyebrow">Weekly staff workflow</p>
+                <h1>Bucks Church Meeting Notes</h1>
+            </div>
+            <div class="masthead-copy">
+                <p>Capture updates by category, keep a local draft, and generate the agenda your team will read tomorrow.</p>
+                <div class="status-row" aria-label="Draft and output status">
+                    <span class="status-pill" id="draftStatus">No draft loaded</span>
+                    <span class="status-pill" id="itemCount">0 notes entered</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace" id="main-content">
+            <section class="editor" aria-labelledby="editor-title">
+                <div class="toolbar" aria-label="Meeting notes actions">
+                    <div>
+                        <p class="eyebrow">Editor</p>
+                        <h2 id="editor-title">Enter this week's updates</h2>
+                    </div>
+                    <p class="feedback feedback-warning" id="formMessage" role="status" aria-live="polite"></p>
+                    <div class="toolbar-actions">
+                        <button class="button button-primary" type="button" id="generateBtn">Generate notes</button>
+                        <button class="button button-secondary" type="button" id="saveDraftBtn">Save draft</button>
+                        <button class="button button-secondary" type="button" id="loadDraftBtn">Load draft</button>
+                        <button class="button button-secondary" type="button" id="clearAllBtn">Clear notes</button>
+                    </div>
+                </div>
+
+                <form id="meeting-form" class="category-list" autocomplete="off"></form>
+            </section>
+
+            <aside class="preview-panel" aria-labelledby="preview-title">
+                <div>
+                    <p class="eyebrow">Generated output</p>
+                    <h2 id="preview-title">Agenda preview</h2>
+                </div>
+                <p class="feedback feedback-success" id="copyMessage" role="status" aria-live="polite"></p>
+                <div class="preview-card">
+                    <div class="preview-page" id="previewPage">
+                        <div class="preview-empty" id="previewEmpty">
+                            <p>Generated meeting notes will appear here after at least one category has content.</p>
+                        </div>
+                        <div class="preview-output" id="outputText" aria-live="polite"></div>
+                    </div>
+                </div>
+                <button class="button button-secondary" type="button" id="copyBtn" disabled>Copy generated notes</button>
+            </aside>
+        </main>
+    </div>
+
+    <dialog id="clearDialog" aria-labelledby="clearDialogTitle">
+        <div class="dialog-body">
+            <div>
+                <h2 class="dialog-title" id="clearDialogTitle">Clear all notes?</h2>
+                <p class="dialog-copy">This removes every category note and the saved draft on this device.</p>
+            </div>
+            <div class="dialog-actions">
+                <button class="button button-danger" type="button" id="confirmClearBtn">Clear notes</button>
+                <button class="button button-secondary" type="button" id="cancelClearBtn">Keep notes</button>
+            </div>
+        </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        "use strict";
+
+        const draftStorageKey = "meetingNotesDraft";
+
+        const categories = [
+            { id: "prayer", name: "Prayer Requests", emoji: "🙏", placeholder: "Add a prayer request or care note" },
+            { id: "body_concerns", name: "Body Concerns / Updates", emoji: "❤️", placeholder: "Add a body concern or update" },
+            { id: "budget", name: "Budget", emoji: "💰", placeholder: "Add a budget note" },
+            { id: "last_sunday", name: "Last Sunday", emoji: "⏪", placeholder: "Add a recap from last Sunday" },
+            { id: "this_sunday", name: "This Coming Sunday", emoji: "⏩", placeholder: "Add a plan for this coming Sunday" },
+            { id: "large_events", name: "Large Upcoming Events", emoji: "🎉", placeholder: "Add a large event update" },
+            { id: "small_groups", name: "Small Groups / Community", emoji: "🏘️", placeholder: "Add a small groups or community note" },
+            { id: "facilities", name: "Facilities", emoji: "🛠️", placeholder: "Add a facilities update" },
+            { id: "media", name: "Media / Communication", emoji: "📱", placeholder: "Add a media or communication update" },
+            { id: "mens_ministry", name: "Men's Ministry", emoji: "👨", placeholder: "Add a Men's Ministry update" },
+            { id: "womens_ministry", name: "Women's Ministry", emoji: "👩", placeholder: "Add a Women's Ministry update" },
+            { id: "youth_ministry", name: "Youth Ministry", emoji: "🧑‍🤝‍🧑", placeholder: "Add a Youth Ministry update" },
+            { id: "childrens_ministry", name: "Children's Ministry", emoji: "🧒", placeholder: "Add a Children's Ministry update" }
+        ];
+
+        const elements = {
+            form: document.getElementById("meeting-form"),
+            generateBtn: document.getElementById("generateBtn"),
+            saveDraftBtn: document.getElementById("saveDraftBtn"),
+            loadDraftBtn: document.getElementById("loadDraftBtn"),
+            clearAllBtn: document.getElementById("clearAllBtn"),
+            confirmClearBtn: document.getElementById("confirmClearBtn"),
+            cancelClearBtn: document.getElementById("cancelClearBtn"),
+            clearDialog: document.getElementById("clearDialog"),
+            formMessage: document.getElementById("formMessage"),
+            copyMessage: document.getElementById("copyMessage"),
+            copyBtn: document.getElementById("copyBtn"),
+            outputText: document.getElementById("outputText"),
+            previewEmpty: document.getElementById("previewEmpty"),
+            draftStatus: document.getElementById("draftStatus"),
+            itemCount: document.getElementById("itemCount"),
+            toast: document.getElementById("toast")
+        };
+
+        let fieldIndex = 0;
+        let toastTimer = 0;
+        let clearTrigger = null;
+
+        /** Creates a stable unique id for labels and inputs in this static page. */
+        function nextFieldId(prefix) {
+            fieldIndex += 1;
+            return `${prefix}-${fieldIndex}`;
+        }
+
+        function escapeHTML(value) {
+            const container = document.createElement("div");
+            container.textContent = value;
+            return container.innerHTML;
+        }
+
+        function showFeedback(element, message, visible = true) {
+            element.textContent = message;
+            element.dataset.visible = visible ? "true" : "false";
+        }
+
+        function clearFeedback(element) {
+            element.textContent = "";
+            element.dataset.visible = "false";
+        }
+
+        function showToast(message) {
+            window.clearTimeout(toastTimer);
+            elements.toast.textContent = message;
+            elements.toast.dataset.visible = "true";
+            toastTimer = window.setTimeout(() => {
+                elements.toast.dataset.visible = "false";
+            }, 1600);
+        }
+
+        function getNextWednesday() {
+            const today = new Date();
+            const currentDay = today.getDay();
+            const daysUntilWednesday = currentDay === 3 ? 0 : (3 - currentDay + 7) % 7;
+            const nextWednesday = new Date(today);
+            nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+            return nextWednesday;
+        }
+
+        function formatMeetingDate() {
+            return getNextWednesday().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            });
+        }
+
+        function createLabel(forId, text) {
+            const label = document.createElement("label");
+            label.htmlFor = forId;
+            label.textContent = text;
+            return label;
+        }
+
+        function createTextInput(id, className, placeholder) {
+            const input = document.createElement("input");
+            input.id = id;
+            input.className = className;
+            input.type = "text";
+            input.placeholder = placeholder;
+            return input;
+        }
+
+        function createRemoveButton(label, onClick) {
+            const button = document.createElement("button");
+            button.className = "remove-button";
+            button.type = "button";
+            button.setAttribute("aria-label", label);
+            button.title = label;
+            button.textContent = "×";
+            button.addEventListener("click", onClick);
+            return button;
+        }
+
+        function createSubpointRow(noteRow, value = "") {
+            const row = document.createElement("div");
+            row.className = "field-row subpoint-row";
+            const inputId = nextFieldId("subpoint");
+            const control = document.createElement("div");
+            control.className = "field-control";
+            control.appendChild(createLabel(inputId, "Subpoint"));
+            const input = createTextInput(inputId, "sub-point", "Add an indented subpoint");
+            input.value = value;
+            control.appendChild(input);
+            row.appendChild(control);
+            row.appendChild(createRemoveButton("Remove subpoint", () => {
+                row.remove();
+                updateEditorState();
+            }));
+            noteRow.querySelector(".subpoint-list").appendChild(row);
+            input.focus();
+        }
+
+        function createNoteRow(category, value = "", subpoints = []) {
+            const noteRow = document.createElement("div");
+            noteRow.className = "note-row";
+            const fieldRow = document.createElement("div");
+            fieldRow.className = "field-row";
+            const inputId = nextFieldId(`${category.id}-note`);
+            const control = document.createElement("div");
+            control.className = "field-control";
+            control.appendChild(createLabel(inputId, "Note"));
+            const input = createTextInput(inputId, "main-point", category.placeholder);
+            input.value = value;
+            control.appendChild(input);
+            fieldRow.appendChild(control);
+            fieldRow.appendChild(createRemoveButton(`Remove note from ${category.name}`, () => {
+                noteRow.remove();
+                ensureCategoryHasRow(category.id);
+                updateEditorState();
+            }));
+            const subpointList = document.createElement("div");
+            subpointList.className = "subpoint-list";
+            const addSubpointButton = document.createElement("button");
+            addSubpointButton.className = "quiet-button";
+            addSubpointButton.type = "button";
+            addSubpointButton.textContent = "+ Add subpoint";
+            addSubpointButton.addEventListener("click", () => createSubpointRow(noteRow));
+            noteRow.appendChild(fieldRow);
+            noteRow.appendChild(subpointList);
+            noteRow.appendChild(addSubpointButton);
+            subpoints.forEach((subpoint) => createSubpointRowWithoutFocus(noteRow, subpoint));
+            return noteRow;
+        }
+
+        function createSubpointRowWithoutFocus(noteRow, value) {
+            const row = document.createElement("div");
+            row.className = "field-row subpoint-row";
+            const inputId = nextFieldId("subpoint");
+            const control = document.createElement("div");
+            control.className = "field-control";
+            control.appendChild(createLabel(inputId, "Subpoint"));
+            const input = createTextInput(inputId, "sub-point", "Add an indented subpoint");
+            input.value = value;
+            control.appendChild(input);
+            row.appendChild(control);
+            row.appendChild(createRemoveButton("Remove subpoint", () => {
+                row.remove();
+                updateEditorState();
+            }));
+            noteRow.querySelector(".subpoint-list").appendChild(row);
+        }
+
+        function renderCategories() {
+            const fragment = document.createDocumentFragment();
+            categories.forEach((category, index) => {
+                const section = document.createElement("section");
+                section.className = "category";
+                section.dataset.category = category.id;
+                section.innerHTML = `
+                    <div class="category-header">
+                        <p class="category-kicker">${String(index + 1).padStart(2, "0")} / Weekly notes</p>
+                        <h3 class="category-title">${category.name}</h3>
+                    </div>
+                    <div class="category-body" data-category-body="${category.id}"></div>
+                `;
+                const body = section.querySelector(".category-body");
+                body.appendChild(createNoteRow(category));
+                const addButton = document.createElement("button");
+                addButton.className = "quiet-button";
+                addButton.type = "button";
+                addButton.textContent = "+ Add note";
+                addButton.addEventListener("click", () => {
+                    const newRow = createNoteRow(category);
+                    body.insertBefore(newRow, addButton);
+                    newRow.querySelector("input").focus();
+                });
+                body.appendChild(addButton);
+                fragment.appendChild(section);
+            });
+            elements.form.appendChild(fragment);
+        }
+
+        function ensureCategoryHasRow(categoryId) {
+            const category = categories.find((item) => item.id === categoryId);
+            const body = document.querySelector(`[data-category-body="${categoryId}"]`);
+            const hasRows = body.querySelectorAll(".note-row").length > 0;
+            if (!hasRows && category) {
+                const addButton = body.querySelector(".quiet-button");
+                body.insertBefore(createNoteRow(category), addButton);
+            }
+        }
+
+        function collectDraftData() {
+            const draft = {};
+            categories.forEach((category) => {
+                const body = document.querySelector(`[data-category-body="${category.id}"]`);
+                draft[category.id] = Array.from(body.querySelectorAll(".note-row"))
+                    .map((row) => {
+                        const noteInput = row.querySelector(".main-point");
+                        const subpoints = Array.from(row.querySelectorAll(".sub-point"))
+                            .map((input) => input.value.trim())
+                            .filter(Boolean);
+                        return {
+                            text: noteInput.value.trim(),
+                            subpoints
+                        };
+                    })
+                    .filter((item) => item.text || item.subpoints.length > 0);
+            });
+            return draft;
+        }
+
+        function countNotes(draft) {
+            return Object.values(draft).reduce((total, items) => total + items.length, 0);
+        }
+
+        function updateStatus() {
+            const draft = collectDraftData();
+            const total = countNotes(draft);
+            elements.itemCount.textContent = total === 1 ? "1 note entered" : `${total} notes entered`;
+        }
+
+        function updatePreview() {
+            const draft = collectDraftData();
+            const total = countNotes(draft);
+
+            if (total === 0) {
+                elements.outputText.innerHTML = "";
+                elements.outputText.dataset.visible = "false";
+                elements.previewEmpty.style.display = "grid";
+                elements.copyBtn.disabled = true;
+                elements.copyBtn.textContent = "Copy generated notes";
+                return;
+            }
+
+            clearFeedback(elements.formMessage);
+            elements.outputText.innerHTML = buildReportHTML(draft);
+            elements.outputText.dataset.visible = "true";
+            elements.previewEmpty.style.display = "none";
+            elements.copyBtn.disabled = false;
+            elements.copyBtn.textContent = "Copy generated notes";
+        }
+
+        function updateEditorState() {
+            updateStatus();
+            updatePreview();
+        }
+
+        function saveDraft() {
+            const draft = collectDraftData();
+            localStorage.setItem(draftStorageKey, JSON.stringify(draft));
+            elements.draftStatus.textContent = `Draft saved ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+            showToast("Draft saved on this device.");
+            clearFeedback(elements.formMessage);
+        }
+
+        function resetEditor() {
+            elements.form.innerHTML = "";
+            fieldIndex = 0;
+            renderCategories();
+            updateEditorState();
+        }
+
+        function loadDraft() {
+            const savedDraft = localStorage.getItem(draftStorageKey);
+            if (!savedDraft) {
+                showFeedback(elements.formMessage, "No saved draft was found on this device.");
+                return;
+            }
+
+            let parsedDraft;
+            try {
+                parsedDraft = JSON.parse(savedDraft);
+            } catch {
+                showFeedback(elements.formMessage, "The saved draft could not be read. Save a new draft to replace it.");
+                return;
+            }
+
+            elements.form.innerHTML = "";
+            fieldIndex = 0;
+            const fragment = document.createDocumentFragment();
+            categories.forEach((category, index) => {
+                const section = document.createElement("section");
+                section.className = "category";
+                section.dataset.category = category.id;
+                section.innerHTML = `
+                    <div class="category-header">
+                        <p class="category-kicker">${String(index + 1).padStart(2, "0")} / Weekly notes</p>
+                        <h3 class="category-title">${category.name}</h3>
+                    </div>
+                    <div class="category-body" data-category-body="${category.id}"></div>
+                `;
+                const body = section.querySelector(".category-body");
+                const items = Array.isArray(parsedDraft[category.id]) ? parsedDraft[category.id] : [];
+                if (items.length === 0) {
+                    body.appendChild(createNoteRow(category));
+                } else {
+                    items.forEach((item) => {
+                        body.appendChild(createNoteRow(category, item.text || "", Array.isArray(item.subpoints) ? item.subpoints : []));
+                    });
+                }
+                const addButton = document.createElement("button");
+                addButton.className = "quiet-button";
+                addButton.type = "button";
+                addButton.textContent = "+ Add note";
+                addButton.addEventListener("click", () => {
+                    const newRow = createNoteRow(category);
+                    body.insertBefore(newRow, addButton);
+                    newRow.querySelector("input").focus();
+                });
+                body.appendChild(addButton);
+                fragment.appendChild(section);
+            });
+            elements.form.appendChild(fragment);
+            elements.draftStatus.textContent = "Draft loaded";
+            clearFeedback(elements.formMessage);
+            updateEditorState();
+            showToast("Draft loaded.");
+            elements.form.querySelector("input")?.focus();
+        }
+
+        function buildReportHTML(draft) {
+            const report = [
+                "<h2>Bucks Church | Staff Meeting Notes</h2>",
+                `<p class="date-line">${formatMeetingDate()}</p>`,
+                "<hr>"
+            ];
+
+            categories.forEach((category) => {
+                const items = draft[category.id] || [];
+                if (items.length === 0) return;
+                report.push(`<h3>${category.emoji} ${escapeHTML(category.name).toUpperCase()}</h3>`);
+                report.push("<ul>");
+                items.forEach((item) => {
+                    report.push(`<li>${escapeHTML(item.text)}`);
+                    if (item.subpoints.length > 0) {
+                        report.push("<ul>");
+                        item.subpoints.forEach((subpoint) => {
+                            report.push(`<li>${escapeHTML(subpoint)}</li>`);
+                        });
+                        report.push("</ul>");
+                    }
+                    report.push("</li>");
+                });
+                report.push("</ul>");
+            });
+
+            return report.join("");
+        }
+
+        function generateReport() {
+            const draft = collectDraftData();
+            const total = countNotes(draft);
+            updateEditorState();
+            if (total === 0) {
+                showFeedback(elements.formMessage, "Add at least one note before generating the meeting agenda.");
+                elements.form.querySelector("input")?.focus();
+                return;
+            }
+
+            elements.outputText.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        async function copyGeneratedNotes() {
+            if (!elements.outputText.dataset.visible) return;
+            const html = elements.outputText.innerHTML;
+            const plainText = elements.outputText.innerText;
+
+            try {
+                if (navigator.clipboard && window.ClipboardItem) {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            "text/html": new Blob([html], { type: "text/html" }),
+                            "text/plain": new Blob([plainText], { type: "text/plain" })
+                        })
+                    ]);
+                } else if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(plainText);
+                } else {
+                    throw new Error("Clipboard API unavailable");
+                }
+                elements.copyBtn.textContent = "Copied";
+                showFeedback(elements.copyMessage, "Generated notes copied to your clipboard.");
+                window.setTimeout(() => {
+                    elements.copyBtn.textContent = "Copy generated notes";
+                    clearFeedback(elements.copyMessage);
+                }, 1600);
+            } catch {
+                showFeedback(elements.copyMessage, "Copy did not work in this browser. Select the preview text and copy it manually.");
+            }
+        }
+
+        function openClearDialog() {
+            clearTrigger = document.activeElement;
+            if (typeof elements.clearDialog.showModal === "function") {
+                elements.clearDialog.showModal();
+                elements.cancelClearBtn.focus();
+            } else {
+                if (window.confirm("Clear all notes? This removes every category note and the saved draft on this device.")) {
+                    clearAllNotes();
+                }
+            }
+        }
+
+        function closeClearDialog() {
+            if (elements.clearDialog.open) {
+                elements.clearDialog.close();
+            }
+            clearTrigger?.focus();
+            clearTrigger = null;
+        }
+
+        function clearAllNotes() {
+            localStorage.removeItem(draftStorageKey);
+            resetEditor();
+            elements.outputText.innerHTML = "";
+            elements.outputText.dataset.visible = "false";
+            elements.previewEmpty.style.display = "grid";
+            elements.copyBtn.disabled = true;
+            elements.copyBtn.textContent = "Copy generated notes";
+            elements.draftStatus.textContent = "Draft cleared";
+            clearFeedback(elements.formMessage);
+            clearFeedback(elements.copyMessage);
+            closeClearDialog();
+            showToast("All notes cleared.");
+            elements.form.querySelector("input")?.focus();
+        }
+
+        elements.form.addEventListener("input", () => {
+            updateEditorState();
+        });
+
+        elements.generateBtn.addEventListener("click", generateReport);
+        elements.saveDraftBtn.addEventListener("click", () => saveDraft());
+        elements.loadDraftBtn.addEventListener("click", loadDraft);
+        elements.copyBtn.addEventListener("click", copyGeneratedNotes);
+        elements.clearAllBtn.addEventListener("click", openClearDialog);
+        elements.confirmClearBtn.addEventListener("click", clearAllNotes);
+        elements.cancelClearBtn.addEventListener("click", closeClearDialog);
+        elements.clearDialog.addEventListener("click", (event) => {
+            if (event.target === elements.clearDialog) closeClearDialog();
+        });
+        elements.clearDialog.addEventListener("close", () => {
+            clearTrigger?.focus();
+            clearTrigger = null;
+        });
+
+        renderCategories();
+        updateEditorState();
+        if (localStorage.getItem(draftStorageKey)) {
+            elements.draftStatus.textContent = "Saved draft available";
+        }
+    </script>
+</body>
 </html>
