@@ -26,7 +26,10 @@ export function CategoryBlock({ definition, index, items, actions }: Props) {
           </h2>
         </div>
         {filledCount > 0 && (
-          <span className="text-mono-label" aria-label={`${filledCount} entries`}>
+          <span
+            className="text-mono-label"
+            aria-label={`${filledCount} ${filledCount === 1 ? 'entry' : 'entries'}`}
+          >
             {filledCount.toString().padStart(2, '0')}
           </span>
         )}
