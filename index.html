@@ -249,6 +249,9 @@
     <!-- Undo toast for Clear All -->
     <div id="undoToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] bg-white border border-slate-200 shadow-lg rounded-full px-5 py-3 items-center gap-2" role="status" aria-live="polite"></div>
 
+    <!-- Transient status toast (non-destructive feedback) -->
+    <div id="statusToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[109] bg-white border border-slate-200 shadow-lg rounded-full px-5 py-3 items-center gap-2" role="status" aria-live="polite"></div>
+
     <script>
         'use strict';
 
@@ -265,6 +268,7 @@
             draftNotification: document.getElementById('draft-notification-area'),
             saveStatus: document.getElementById('saveStatus'),
             undoToast: document.getElementById('undoToast'),
+            statusToast: document.getElementById('statusToast'),
             howToUseDetails: document.getElementById('howToUseDetails'),
             targetDate: document.getElementById('targetDate'),
             groupNav: document.getElementById('groupNav')
@@ -311,6 +315,28 @@
         let pendingUndoSnapshot = null;
         let pendingUndoDraft = null;
         let undoTimer = null;
+
+        // --- Transient status toast (non-destructive feedback; announced once) ---
+        let toastTimer = null;
+
+        function showToast(message, opts) {
+            opts = opts || {};
+            const duration = opts.duration || 3500;
+            const icon = opts.icon || '';
+            const toast = DOM.statusToast;
+            toast.innerHTML = '';
+            const span = document.createElement('span');
+            span.textContent = (icon ? icon + ' ' : '') + message;
+            span.className = 'font-semibold text-slate-700';
+            toast.appendChild(span);
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, duration);
+        }
 
         function scheduleAutoSave() {
             clearTimeout(autoSaveTimeout);
@@ -733,7 +759,7 @@
             });
         }
 
-        function generateReport() {
+        function buildReportHTML() {
             let hasContent = false;
             const reportParts = [
                 '<div style="font-size: 1.3em; font-weight: bold;">Bucks Church | Staff Meeting Notes</div>',
@@ -776,12 +802,92 @@
                 }
             }
 
+            return { html: reportParts.join(''), hasContent };
+        }
+
+        function buildReportPlainText() {
+            const lines = [];
+            lines.push('Bucks Church | Staff Meeting Notes');
+            lines.push(getNextWednesday().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+            lines.push('');
+            for (const id of categoryKeys) {
+                const details = categoryDetails[id];
+                const inputsContainer = document.getElementById(id + '-inputs');
+                if (!inputsContainer) continue;
+                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
+                const sectionLines = [];
+                mainItemWrappers.forEach(wrapper => {
+                    const mainPointInput = wrapper.querySelector('.main-point');
+                    if (!mainPointInput?.value.trim()) return;
+                    sectionLines.push('  - ' + mainPointInput.value.trim());
+                    Array.from(wrapper.querySelectorAll('.sub-point'))
+                        .filter(sub => sub.value.trim())
+                        .forEach(sub => sectionLines.push('      - ' + sub.value.trim()));
+                });
+                if (sectionLines.length) {
+                    lines.push(details.emoji + ' ' + details.name);
+                    lines.push(...sectionLines);
+                    lines.push('');
+                }
+            }
+            return lines.join('\n');
+        }
+
+        function buildStandaloneHTML() {
+            const body = buildReportHTML().html;
+            return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<title>Bucks Church Meeting Notes</title>\n<style>body{font-family:Figtree,Arial,sans-serif;color:#1e293b;max-width:720px;margin:2rem auto;padding:0 1rem;line-height:1.5}ul{padding-left:2rem;list-style:disc}ul ul{list-style:circle}b{font-weight:700}</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>';
+        }
+
+        function buildWordHTML() {
+            const body = buildReportHTML().html;
+            return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Bucks Church Meeting Notes</title><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>@page WordSection1{margin:1in}body{font-family:Arial,sans-serif;color:#1e293b;line-height:1.5}ul{margin:0 0 0 0.5in}b{font-weight:bold}</style></head><body><div class="WordSection1">' + body + '</div></body></html>';
+        }
+
+        function copyText(text) {
+            function fallback(t) {
+                const ta = document.createElement('textarea');
+                ta.value = t;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch (_) {}
+                ta.remove();
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => fallback(text));
+            } else {
+                fallback(text);
+            }
+        }
+
+        function downloadBlob(filename, content, mime) {
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function reportDateStamp() {
+            const d = getNextWednesday();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + day;
+        }
+
+        function generateReport() {
+            const { html, hasContent } = buildReportHTML();
             if (!hasContent) {
                 showAlert('Please fill in at least one item in any category before generating the report.');
                 return;
             }
-
-            DOM.outputText.innerHTML = reportParts.join('');
+            DOM.outputText.innerHTML = html;
             DOM.outputSection.classList.remove('hidden');
             DOM.outputSection.classList.add('fade-in');
 
@@ -829,7 +935,7 @@
 
         function saveDraft() {
             saveDraftSilent();
-            showAlert('Snapshot saved!');
+            showToast('Snapshot saved', { icon: '💾' });
         }
 
         // Validate the shape of parsed draft data before it touches the DOM.
@@ -861,14 +967,14 @@
                 if (!isValidDraftShape(parsedData)) throw new Error('Invalid draft structure');
                 applyDraftData(parsedData);
             } catch (err) {
-                showAlert('Saved notes could not be read. The corrupted draft was removed.');
+                showToast('Saved notes could not be read; the corrupted draft was removed.', { icon: '⚠️', duration: 5000 });
                 localStorage.removeItem('meetingNotesDraft');
                 lastSavedAt = null;
                 updateSaveStatus();
                 return;
             }
 
-            showAlert('Draft loaded successfully!');
+            showToast('Draft loaded', { icon: '📂' });
             DOM.draftNotification.innerHTML = '';
             DOM.draftNotification.classList.add('hidden');
         }
