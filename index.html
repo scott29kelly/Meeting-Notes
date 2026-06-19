@@ -52,7 +52,6 @@
 
         .fade-in {
             animation: fadeInAnimation 0.5s ease-out forwards;
-            will-change: opacity, transform;
         }
         @keyframes fadeInAnimation {
             from { opacity: 0; transform: translateY(10px); }
@@ -148,7 +147,7 @@
             <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Meeting Notes</h1>
             <p class="text-base md:text-lg opacity-90">Simple Meeting Notes Generator</p>
             <p class="text-sm md:text-base mt-1 opacity-90">✍️ Composing for: <span id="targetDate"></span></p>
-            <div id="saveStatus" class="mt-3 inline-block bg-black/15 text-white rounded-full px-3 py-1 text-sm font-medium" role="status" aria-live="polite">💬 Auto-save on</div>
+            <div id="saveStatus" class="mt-3 inline-block bg-black/15 text-white rounded-full px-3 py-1 text-sm font-medium">💬 Auto-save on</div>
         </header>
 
         <main class="form-container p-6 md:p-10 space-y-8">
@@ -286,7 +285,6 @@
         // --- Auto-save + status ---
         let autoSaveTimeout;
         let lastSavedAt = null;
-        let lastStatusLabel = '';
 
         // --- Clear-All undo state ---
         let pendingUndoSnapshot = null;
@@ -298,19 +296,9 @@
             autoSaveTimeout = setTimeout(saveDraftSilent, 2000);
         }
 
+        // Updates only on save events (no periodic timer) to avoid idle main-thread churn.
         function updateSaveStatus() {
-            let label;
-            if (!lastSavedAt) {
-                label = '💬 Auto-save on';
-            } else {
-                const secs = Math.round((Date.now() - lastSavedAt) / 1000);
-                if (secs < 4) label = '✅ Saved just now';
-                else if (secs < 60) label = `✅ Saved ${secs}s ago`;
-                else label = `✅ Saved ${Math.round(secs / 60)}m ago`;
-            }
-            if (label === lastStatusLabel) return;
-            lastStatusLabel = label;
-            DOM.saveStatus.textContent = label;
+            DOM.saveStatus.textContent = lastSavedAt ? '✅ Saved' : '💬 Auto-save on';
         }
 
         function gatherDraftData() {
@@ -856,8 +844,6 @@
                     </div>`;
             }
 
-            // Keep save status fresh
-            setInterval(updateSaveStatus, 5000);
             updateSaveStatus();
         });
     </script>
