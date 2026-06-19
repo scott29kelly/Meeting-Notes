@@ -1,0 +1,49 @@
+name: build-css
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'src/input.css'
+      - 'tailwind.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'dist/styles.css'
+      - '.github/workflows/ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'src/input.css'
+      - 'tailwind.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'dist/styles.css'
+
+jobs:
+  verify-css:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:css
+
+      - name: dist/styles.css must be committed
+        run: |
+          if git ls-files --error-unmatch dist/styles.css >/dev/null 2>&1; then
+            echo "dist/styles.css is tracked"
+          else
+            echo "::error::dist/styles.css is not committed; the page would render unstyled. Run 'npm run build:css' and commit dist/styles.css."
+            exit 1
+          fi
+
+      - name: dist/styles.css must be up to date
+        run: |
+          if ! git diff --exit-code -- dist/styles.css; then
+            echo "::error::dist/styles.css is stale. Rebuild with 'npm run build:css' and commit the result."
+            exit 1
+          fi

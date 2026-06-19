@@ -4,47 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucks Church Meeting Notes</title>
-    
+
+    <!-- Emoji favicon (prevents favicon 404) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+
     <!-- Performance: Resource Hints for faster connections -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    
+
     <!-- Performance: Preload critical font with font-display swap for non-blocking render -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    
-    <!-- Performance: Defer non-critical CSS parsing -->
-    <script src="https://cdn.tailwindcss.com" defer></script>
-    
+
+    <!-- Built Tailwind CSS (replaces runtime CDN JIT) -->
+    <link rel="stylesheet" href="dist/styles.css">
+
     <style>
-        /* Critical CSS - Inlined for fastest first paint */
+        /* Theming tokens: peppy palette using accessible (corrected) values */
+        :root {
+            --bg: #ecfdf5;              /* emerald-50: bright peppy surface */
+            --surface: #ffffff;         /* card surface */
+            --surface-muted: #f8fafc;   /* slate-50 */
+            --border-subtle: #e2e8f0;   /* slate-200 */
+            --text: #1e293b;            /* slate-800 */
+            --text-muted: #475569;      /* slate-600 */
+            --accent-green: #15803d;    /* green-700 (>=5:1 on white) */
+            --accent-emerald: #047857;  /* emerald-700 */
+            --accent-blue: #1d4ed8;     /* blue-700 */
+            --accent-sky: #0369a1;      /* sky-700 */
+            --accent-red: #b91c1c;      /* red-700 */
+            --accent-gray: #374151;     /* gray-700 */
+            --modal-overlay: rgba(15, 23, 42, 0.55);
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f0f2f5;
+            background-color: var(--bg);
             margin: 0;
         }
-        
-        /* Performance: GPU-accelerated scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* Performance: GPU-accelerated animations with will-change */
+
         .fade-in {
             animation: fadeInAnimation 0.5s ease-out forwards;
             will-change: opacity, transform;
@@ -53,14 +53,13 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Performance: Use transform for button states (GPU accelerated) */
+
+        /* Copied state uses the accessible green token */
         .copy-btn.copied {
-            background-color: #22c55e !important;
-            color: white !important;
+            background-color: var(--accent-green) !important;
+            color: #ffffff !important;
         }
-        
-        /* Performance: Containment for modal to isolate layout/paint */
+
         .modal {
             position: fixed;
             z-index: 100;
@@ -69,33 +68,24 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: var(--modal-overlay);
             padding-top: 60px;
             contain: layout style;
             will-change: opacity;
         }
         .modal-content {
-            background-color: #fefefe;
+            background-color: var(--surface);
             margin: auto;
             padding: 20px;
-            border: 1px solid #888;
+            border: 1px solid var(--border-subtle);
             width: 80%;
             max-width: 400px;
             border-radius: 0.5rem;
             text-align: center;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
         }
-        
-        /* Performance: Containment for categories to isolate reflows */
-        .category {
-            transition: border-color 0.3s ease-out;
-            contain: layout style;
-        }
-        .category:hover {
-            border-color: #34d399;
-        }
-        
-        /* Style for indented bullet points in the output */
+
+        /* Indented bullet points in the output */
         #outputText ul {
             padding-left: 2rem;
             list-style-type: disc;
@@ -103,18 +93,21 @@
         #outputText ul ul {
             list-style-type: circle;
         }
-        
-        /* Performance: Hide elements not needed initially */
+
+        /* Hide elements cleanly */
         .hidden { display: none !important; }
-        
+
         /* SVG icons base styling */
         .icon { display: inline-block; width: 1.25rem; height: 1.25rem; }
         .icon-sm { width: 1rem; height: 1rem; }
-        .icon-lg { width: 1.5rem; height: 1.5rem; }
+
+        /* Native disclosure: remove default marker (custom chevron used) */
+        summary { list-style: none; }
+        summary::-webkit-details-marker { display: none; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
-    <!-- Performance: SVG Sprite - Define once, reuse everywhere (reduces HTML size) -->
+<body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+    <!-- SVG Sprite - Define once, reuse everywhere -->
     <svg xmlns="http://www.w3.org/2000/svg" class="hidden" aria-hidden="true">
         <defs>
             <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -146,62 +139,72 @@
 
     <div class="container bg-white w-full max-w-3xl mx-auto rounded-xl shadow-2xl overflow-hidden fade-in">
         <!-- Header -->
-        <header class="header bg-gradient-to-r from-green-500 to-emerald-600 text-white p-8 text-center">
+        <header class="header bg-gradient-to-r from-green-700 to-emerald-800 text-white p-8 text-center">
             <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Meeting Notes</h1>
-            <p class="text-lg md:text-xl opacity-90">Simple Meeting Notes Generator</p>
+            <p class="text-base md:text-lg opacity-90">Simple Meeting Notes Generator</p>
+            <p class="text-sm md:text-base mt-1 opacity-90">✍️ Composing for: <span id="targetDate"></span></p>
+            <div id="saveStatus" class="mt-3 inline-block bg-black/15 text-white rounded-full px-3 py-1 text-sm font-medium" role="status" aria-live="polite">💬 Auto-save on</div>
         </header>
 
         <main class="form-container p-6 md:p-10 space-y-8">
-            <!-- Instructions -->
-            <section class="instructions bg-sky-50 border-l-4 border-sky-500 text-sky-700 p-6 rounded-lg shadow-sm">
-                <div id="draft-notification-area"></div>
-                <h4 class="text-xl font-semibold mb-3 flex items-center">
-                    <svg class="icon-lg mr-2 text-sky-600"><use href="#icon-info"/></svg>
-                    How to Use This Tool
-                </h4>
-                <ol class="list-decimal list-inside space-y-1 text-sm md:text-base">
-                    <li>Enter updates in the fields for each category.</li>
-                    <li>Use "+ Add Item" for a new bullet point and "+ Add Subpoint" for an indented bullet.</li>
-                    <li>Click "💾 Save Draft" to save your progress.</li>
-                    <li>Click "✨ Generate" to create your report.</li>
+            <!-- Draft found notice (conditional) -->
+            <div id="draft-notification-area" class="hidden"></div>
+
+            <!-- In-page section navigation -->
+            <nav aria-label="Jump to section" class="flex flex-wrap gap-2" id="groupNav"></nav>
+
+            <!-- How to use (collapsible, collapses after first dismiss) -->
+            <details class="group" id="howToUseDetails" open>
+                <summary class="cursor-pointer list-none flex items-center justify-between py-1 select-none">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 text-sky-700"><svg class="icon-sm"><use href="#icon-info"/></svg></span>
+                        How to Use This Tool
+                    </h2>
+                    <span class="text-slate-400 text-sm transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
+                </summary>
+                <ol class="list-decimal list-inside space-y-1 text-sm md:text-base text-slate-700 pt-3 pl-1">
+                    <li>Your notes <b>auto-save</b> as you type.</li>
+                    <li>Use "Add Item" for a new bullet point and "Add Subpoint" for an indented bullet.</li>
+                    <li>Click "💾 Save snapshot" to save a named copy of your progress.</li>
+                    <li>Click "✨ Generate Meeting Notes" to create your report.</li>
                 </ol>
-            </section>
+            </details>
 
-            <!-- Categories Container -->
-            <div id="categories-container" class="space-y-6"></div>
+            <!-- Categories grouped into collapsible sections -->
+            <div id="categories-container" class="space-y-2"></div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-4 justify-center items-center mt-8">
-                <button class="generate-btn w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" id="generateBtn">
+            <!-- Action Buttons: Generate is primary; Clear All is demoted (destructive outline) -->
+            <div class="flex flex-col gap-3 mt-8">
+                <button class="generate-btn w-full flex items-center justify-center bg-green-700 hover:bg-green-800 text-white text-lg font-bold py-4 px-6 rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" id="generateBtn">
                     <svg class="icon mr-2"><use href="#icon-plus-circle"/></svg>
                     ✨ Generate Meeting Notes
                 </button>
-                <button type="button" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" id="saveDraftBtn">
-                    <svg class="icon mr-2"><use href="#icon-save"/></svg>
-                    💾 Save Draft
-                </button>
-                <button type="button" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105" id="loadDraftBtn">
-                    <svg class="icon mr-2"><use href="#icon-folder"/></svg>
-                    📂 Load Draft
-                </button>
-                <button type="button" id="clearAllBtn" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                    <svg class="icon mr-2"><use href="#icon-trash"/></svg>
-                    Clear All Notes
-                </button>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button type="button" class="flex-1 min-w-[8rem] flex items-center justify-center bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" id="saveDraftBtn">
+                        <svg class="icon mr-2"><use href="#icon-save"/></svg>
+                        💾 Save snapshot
+                    </button>
+                    <button type="button" class="flex-1 min-w-[8rem] flex items-center justify-center bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" id="loadDraftBtn">
+                        <svg class="icon mr-2"><use href="#icon-folder"/></svg>
+                        📂 Load Draft
+                    </button>
+                    <button type="button" id="clearAllBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 border-2 border-red-200 font-semibold py-3 px-5 rounded-lg transition-all duration-200 hover:-translate-y-0.5">
+                        <svg class="icon mr-2"><use href="#icon-trash"/></svg>
+                        Clear All Notes
+                    </button>
+                </div>
             </div>
 
             <!-- Output Section -->
             <section class="output-section mt-10 pt-6 border-t border-slate-200 hidden" id="outputSection">
-                <div class="output-container bg-slate-100 p-6 rounded-lg shadow-inner">
-                    <div class="output-header flex justify-between items-center mb-4">
-                        <h3 id="outputTitle" class="text-xl font-semibold text-slate-800">📋 Your Meeting Notes</h3>
-                        <button class="copy-btn bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" id="copyBtn">
-                            <svg class="icon-sm mr-1.5"><use href="#icon-copy"/></svg>
-                            Copy to Clipboard
-                        </button>
-                    </div>
-                    <div class="output-text bg-white border border-slate-300 rounded-md p-4 whitespace-pre-wrap font-sans text-slate-700 max-h-[400px] overflow-y-auto shadow-sm" id="outputText" style="font-size: 14px;"></div>
+                <div class="output-header flex justify-between items-center mb-4">
+                    <h2 id="outputTitle" class="text-xl font-bold text-slate-800">Your Meeting Notes</h2>
+                    <button class="copy-btn bg-sky-700 hover:bg-sky-800 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" id="copyBtn">
+                        <svg class="icon-sm mr-1.5"><use href="#icon-copy"/></svg>
+                        Copy to Clipboard
+                    </button>
                 </div>
+                <div class="output-text text-slate-700 text-sm" id="outputText"></div>
             </section>
         </main>
     </div>
@@ -211,18 +214,20 @@
         <div class="modal-content p-6 rounded-lg bg-white shadow-xl">
             <p id="customModalMessage" class="text-slate-700 text-lg mb-6"></p>
             <div class="flex justify-center gap-4">
-                <button id="customModalConfirmBtn" class="modal-confirm-btn bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-md transition-colors">Confirm</button>
+                <button id="customModalConfirmBtn" class="modal-confirm-btn bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-6 rounded-md transition-colors">Confirm</button>
                 <button id="customModalCancelBtn" class="modal-cancel-btn bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold py-2 px-6 rounded-md transition-colors">Cancel</button>
-                <button id="customModalOkBtn" class="modal-ok-btn bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-md transition-colors hidden">OK</button>
+                <button id="customModalOkBtn" class="modal-ok-btn bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-6 rounded-md transition-colors hidden">OK</button>
             </div>
         </div>
     </div>
 
+    <!-- Undo toast for Clear All -->
+    <div id="undoToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] bg-white border border-slate-200 shadow-lg rounded-full px-5 py-3 items-center gap-2" role="status" aria-live="polite"></div>
+
     <script>
-        // Performance: Use strict mode for faster execution
         'use strict';
-        
-        // Performance: Cache DOM references to avoid repeated lookups
+
+        // Cache DOM references
         const DOM = {
             modal: document.getElementById('customModal'),
             modalMessage: document.getElementById('customModalMessage'),
@@ -232,10 +237,15 @@
             categoriesContainer: document.getElementById('categories-container'),
             outputSection: document.getElementById('outputSection'),
             outputText: document.getElementById('outputText'),
-            draftNotification: document.getElementById('draft-notification-area')
+            draftNotification: document.getElementById('draft-notification-area'),
+            saveStatus: document.getElementById('saveStatus'),
+            undoToast: document.getElementById('undoToast'),
+            howToUseDetails: document.getElementById('howToUseDetails'),
+            targetDate: document.getElementById('targetDate'),
+            groupNav: document.getElementById('groupNav')
         };
-        
-        // Performance: Freeze configuration object to prevent accidental modifications
+
+        // Category metadata (keys unchanged; report + persistence rely on these)
         const categoryDetails = Object.freeze({
             'prayer': { name: 'Prayer Requests', emoji: '🙏', placeholder: 'Enter prayer request...' },
             'body_concerns': { name: 'Body Concerns/Updates', emoji: '❤️', placeholder: 'Enter concern or update...' },
@@ -251,34 +261,60 @@
             'youth_ministry': { name: 'Youth Ministry', emoji: '🧑‍🤝‍🧑', placeholder: 'Enter Youth Ministry update...' },
             'childrens_ministry': { name: "Children's Ministry", emoji: '🧒', placeholder: "Enter Children's Ministry update..." }
         });
-        
-        // Performance: Pre-compute category keys
         const categoryKeys = Object.keys(categoryDetails);
 
-        // Security: Sanitize HTML to prevent XSS attacks
+        // Visual grouping (all 13 keys preserved; only wrapping changes)
+        const categoryGroups = Object.freeze([
+            { title: 'Worship & Sundays', emoji: '⛪', keys: ['last_sunday', 'this_sunday', 'prayer'] },
+            { title: 'Community & Events', emoji: '🤝', keys: ['body_concerns', 'small_groups', 'large_events'] },
+            { title: 'Ministries', emoji: '👥', keys: ['mens_ministry', 'womens_ministry', 'youth_ministry', 'childrens_ministry'] },
+            { title: 'Operations', emoji: '📋', keys: ['budget', 'facilities', 'media'] }
+        ]);
+
+        // Sanitize HTML to prevent XSS
         function sanitizeHTML(str) {
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
         }
 
-        // Auto-save functionality
+        // --- Auto-save + status ---
         let autoSaveTimeout;
+        let lastSavedAt = null;
+        let lastStatusLabel = '';
+
+        // --- Clear-All undo state ---
+        let pendingUndoSnapshot = null;
+        let pendingUndoDraft = null;
+        let undoTimer = null;
+
         function scheduleAutoSave() {
             clearTimeout(autoSaveTimeout);
-            autoSaveTimeout = setTimeout(() => {
-                saveDraftSilent();
-            }, 2000);
+            autoSaveTimeout = setTimeout(saveDraftSilent, 2000);
         }
 
-        function saveDraftSilent() {
+        function updateSaveStatus() {
+            let label;
+            if (!lastSavedAt) {
+                label = '💬 Auto-save on';
+            } else {
+                const secs = Math.round((Date.now() - lastSavedAt) / 1000);
+                if (secs < 4) label = '✅ Saved just now';
+                else if (secs < 60) label = `✅ Saved ${secs}s ago`;
+                else label = `✅ Saved ${Math.round(secs / 60)}m ago`;
+            }
+            if (label === lastStatusLabel) return;
+            lastStatusLabel = label;
+            DOM.saveStatus.textContent = label;
+        }
+
+        function gatherDraftData() {
             const draftData = {};
             for (const id of categoryKeys) {
                 const inputsContainer = document.getElementById(id + '-inputs');
                 if (!inputsContainer) continue;
-                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
                 draftData[id] = [];
-                mainItemWrappers.forEach(wrapper => {
+                inputsContainer.querySelectorAll('.main-item-wrapper').forEach(wrapper => {
                     const mainPointInput = wrapper.querySelector('.main-point');
                     if (mainPointInput?.value.trim()) {
                         const subpoints = Array.from(wrapper.querySelectorAll('.sub-point'))
@@ -288,7 +324,13 @@
                     }
                 });
             }
-            localStorage.setItem('meetingNotesDraft', JSON.stringify(draftData));
+            return draftData;
+        }
+
+        function saveDraftSilent() {
+            localStorage.setItem('meetingNotesDraft', JSON.stringify(gatherDraftData()));
+            lastSavedAt = Date.now();
+            updateSaveStatus();
         }
 
         // Listen for input changes to trigger auto-save
@@ -298,25 +340,49 @@
             }
         });
 
-        // Close modal with ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !DOM.modal.classList.contains('hidden')) {
-                hideModal();
-            }
-        });
+        // --- Modal (with focus trap + restore) ---
+        let lastFocusedElement = null;
 
-        // Modal functions
+        function getModalFocusables() {
+            return [DOM.modalConfirmBtn, DOM.modalCancelBtn, DOM.modalOkBtn]
+                .filter(b => !b.classList.contains('hidden'));
+        }
+
+        function trapTab(e) {
+            if (e.key !== 'Tab') return;
+            const focusables = getModalFocusables();
+            if (focusables.length === 0) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+
         function showModal(isAlert) {
             DOM.modalConfirmBtn.classList.toggle('hidden', isAlert);
             DOM.modalCancelBtn.classList.toggle('hidden', isAlert);
             DOM.modalOkBtn.classList.toggle('hidden', !isAlert);
             DOM.modal.classList.remove('hidden');
             DOM.modal.classList.add('flex');
+            lastFocusedElement = document.activeElement;
+            const primary = isAlert ? DOM.modalOkBtn : DOM.modalConfirmBtn;
+            document.addEventListener('keydown', trapTab);
+            primary.focus({ preventScroll: true });
         }
-        
+
         function hideModal() {
             DOM.modal.classList.add('hidden');
             DOM.modal.classList.remove('flex');
+            document.removeEventListener('keydown', trapTab);
+            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
         }
 
         function showAlert(message) {
@@ -331,58 +397,65 @@
             DOM.modalConfirmBtn.onclick = () => { hideModal(); if (onConfirm) onConfirm(); };
             DOM.modalCancelBtn.onclick = hideModal;
         }
-        
-        // Performance: Event delegation for modal backdrop click
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !DOM.modal.classList.contains('hidden')) {
+                hideModal();
+            }
+        });
+
+        // Backdrop click closes modal
         DOM.modal.addEventListener('click', (e) => {
             if (e.target === DOM.modal) hideModal();
         });
 
-        // Performance: Use DocumentFragment for batch DOM operations
-        function createInputElement(type, className, placeholder) {
+        // --- Input / button factories ---
+        function createInputElement(type, className, placeholder, label) {
             const input = document.createElement('input');
             input.type = type;
             input.className = className;
             input.placeholder = placeholder;
+            input.setAttribute('aria-label', label || placeholder);
             return input;
         }
-        
-        // Performance: Create button with SVG using template
-        function createRemoveButton(onClick) {
+
+        function createRemoveButton(onClick, ariaLabel) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'p-2 text-red-500 hover:text-red-700 rounded-md hover:bg-red-100 transition-colors duration-150';
+            btn.className = 'p-2.5 text-red-600 hover:text-red-700 rounded-md hover:bg-red-50 transition-colors duration-150';
+            btn.setAttribute('aria-label', ariaLabel || 'Remove item');
             btn.innerHTML = '<svg class="icon"><use href="#icon-trash"/></svg>';
             btn.onclick = onClick;
             return btn;
         }
-        
+
         function createSubpointButton(parentWrapper, placeholder) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'add-subpoint-btn ml-8 mt-1 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center';
+            btn.className = 'add-subpoint-btn ml-8 mt-1 text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center';
             btn.innerHTML = '<svg class="icon-sm mr-1"><use href="#icon-plus"/></svg> Add Subpoint';
             btn.onclick = () => addSubItem(parentWrapper, placeholder);
             return btn;
         }
 
-        function addMainItem(container, placeholder) {
+        function addMainItem(container, placeholder, label) {
             const itemWrapper = document.createElement('div');
             itemWrapper.className = 'main-item-wrapper mt-2';
 
             const inputGroup = document.createElement('div');
             inputGroup.className = 'flex items-center space-x-2';
-            
-            const newInput = createInputElement('text', 
-                'main-point flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm placeholder-slate-400',
-                placeholder);
+
+            const newInput = createInputElement('text',
+                'main-point flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all duration-200 text-sm placeholder-slate-400',
+                placeholder, label);
 
             inputGroup.appendChild(newInput);
-            inputGroup.appendChild(createRemoveButton(() => itemWrapper.remove()));
+            inputGroup.appendChild(createRemoveButton(() => itemWrapper.remove(), 'Remove item'));
             itemWrapper.appendChild(inputGroup);
             itemWrapper.appendChild(createSubpointButton(itemWrapper, 'Enter subpoint...'));
             container.appendChild(itemWrapper);
-            
-            // Performance: Use requestAnimationFrame for focus to avoid layout thrashing
+
             requestAnimationFrame(() => newInput.focus());
             return itemWrapper;
         }
@@ -393,65 +466,156 @@
 
             const subItemGroup = document.createElement('div');
             subItemGroup.className = 'sub-item-group ml-8 mt-2 flex items-center space-x-2';
-            
+
             const newInput = createInputElement('text',
-                'sub-point flex-grow p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm placeholder-slate-400',
-                placeholder);
+                'sub-point flex-grow p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all duration-200 text-sm placeholder-slate-400',
+                placeholder, 'Subpoint');
 
             subItemGroup.appendChild(newInput);
-            subItemGroup.appendChild(createRemoveButton(() => subItemGroup.remove()));
+            subItemGroup.appendChild(createRemoveButton(() => subItemGroup.remove(), 'Remove subpoint'));
             parentWrapper.appendChild(subItemGroup);
             parentWrapper.appendChild(createSubpointButton(parentWrapper, placeholder));
-            
+
             requestAnimationFrame(() => newInput.focus());
         }
 
-        // Performance: Cache date calculation
+        // Cache date calculation
         const getNextWednesday = (() => {
             let cachedDate = null;
             let cachedDay = null;
-            
+
             return () => {
                 const today = new Date();
                 const todayDay = today.toDateString();
-                
+
                 if (cachedDay === todayDay && cachedDate) return cachedDate;
-                
+
                 const dayOfWeek = today.getDay();
                 const daysUntilWednesday = (3 - dayOfWeek + 7) % 7 || 7;
                 const nextWednesday = new Date(today);
                 nextWednesday.setDate(today.getDate() + (dayOfWeek === 3 ? 0 : daysUntilWednesday));
-                
+
                 cachedDate = nextWednesday;
                 cachedDay = todayDay;
                 return nextWednesday;
             };
         })();
-        
+
+        function applyDraftData(parsedData) {
+            for (const id of categoryKeys) {
+                const c = document.getElementById(id + '-inputs');
+                if (c) c.innerHTML = '';
+            }
+            for (const id in parsedData) {
+                const inputsContainer = document.getElementById(id + '-inputs');
+                if (!inputsContainer) continue;
+                const items = parsedData[id];
+
+                if (!items || items.length === 0) {
+                    addMainItem(inputsContainer, categoryDetails[id].placeholder);
+                } else {
+                    items.forEach(itemData => {
+                        const itemWrapper = addMainItem(inputsContainer, categoryDetails[id].placeholder);
+                        itemWrapper.querySelector('.main-point').value = itemData.text;
+
+                        itemData.subpoints.forEach(subpointText => {
+                            addSubItem(itemWrapper, 'Enter subpoint...');
+                            const subInputs = itemWrapper.querySelectorAll('.sub-point');
+                            subInputs[subInputs.length - 1].value = subpointText;
+                        });
+                    });
+                }
+            }
+        }
+
         function actualClearAllNotes() {
             categoryKeys.forEach(id => {
                 const inputsContainer = document.getElementById(id + '-inputs');
                 if (inputsContainer) {
                     inputsContainer.innerHTML = '';
-                    addMainItem(inputsContainer, categoryDetails[id].placeholder);
+                    addMainItem(inputsContainer, categoryDetails[id].placeholder, `${categoryDetails[id].name} item`);
                 }
             });
             DOM.outputSection.classList.add('hidden');
             DOM.outputText.textContent = '';
         }
 
+        function clearUndoTimer() {
+            if (undoTimer) {
+                clearTimeout(undoTimer);
+                undoTimer = null;
+            }
+        }
+
+        function hideUndoToast() {
+            DOM.undoToast.classList.add('hidden');
+            DOM.undoToast.classList.remove('flex');
+            clearUndoTimer();
+            pendingUndoSnapshot = null;
+            pendingUndoDraft = null;
+        }
+
+        function showUndoToast() {
+            const toast = DOM.undoToast;
+            toast.innerHTML = '';
+
+            const text = document.createElement('span');
+            text.textContent = '🗑️ All notes cleared';
+            text.className = 'font-semibold text-slate-700';
+
+            const undoBtn = document.createElement('button');
+            undoBtn.type = 'button';
+            undoBtn.textContent = 'Undo';
+            undoBtn.className = 'ml-4 text-sm font-bold text-emerald-700 hover:text-emerald-800 underline underline-offset-2';
+
+            toast.appendChild(text);
+            toast.appendChild(undoBtn);
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+
+            clearUndoTimer();
+            undoTimer = setTimeout(hideUndoToast, 10000);
+
+            undoBtn.onclick = () => {
+                const snap = pendingUndoSnapshot;
+                const draft = pendingUndoDraft;
+                hideUndoToast();
+                if (snap) applyDraftData(snap);
+                if (draft) localStorage.setItem('meetingNotesDraft', draft);
+                scheduleAutoSave();
+            };
+        }
+
         function requestClearAllConfirmation() {
-            showConfirmation("Are you sure you want to clear all notes? This action cannot be undone.", () => {
-                clearTimeout(autoSaveTimeout); // Cancel any pending auto-save
+            showConfirmation('Clear all notes? You can undo this for 10 seconds.', () => {
+                clearTimeout(autoSaveTimeout);
+                const snapshot = gatherDraftData();
+                const snapshotDraft = localStorage.getItem('meetingNotesDraft');
+                const hasContent = categoryKeys.some(id => snapshot[id] && snapshot[id].length > 0);
+
+                // If already cleared (a toast is pending) and nothing new was typed,
+                // keep the original recoverable snapshot and just refresh the undo window.
+                if (!hasContent && pendingUndoSnapshot) {
+                    actualClearAllNotes();
+                    localStorage.removeItem('meetingNotesDraft');
+                    lastSavedAt = null;
+                    updateSaveStatus();
+                    showUndoToast();
+                    return;
+                }
+
+                pendingUndoSnapshot = snapshot;
+                pendingUndoDraft = snapshotDraft;
                 actualClearAllNotes();
                 localStorage.removeItem('meetingNotesDraft');
-                showAlert("All notes have been cleared.");
+                lastSavedAt = null;
+                updateSaveStatus();
+                showUndoToast();
             });
         }
 
         function generateReport() {
             let hasContent = false;
-            // Performance: Use array and join for string building instead of concatenation
             const reportParts = [
                 '<div style="font-size: 1.3em; font-weight: bold;">Bucks Church | Staff Meeting Notes</div>',
                 `<div>${getNextWednesday().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div><br>`,
@@ -468,7 +632,7 @@
                 mainItemWrappers.forEach(wrapper => {
                     const mainPointInput = wrapper.querySelector('.main-point');
                     const subPointInputs = wrapper.querySelectorAll('.sub-point');
-                    
+
                     if (mainPointInput?.value.trim()) {
                         hasContent = true;
                         sectionContent += `<li>${sanitizeHTML(mainPointInput.value.trim())}`;
@@ -477,7 +641,7 @@
                             .filter(sub => sub.value.trim())
                             .map(sub => `<li>${sanitizeHTML(sub.value.trim())}</li>`)
                             .join('');
-                        
+
                         if (subItems) {
                             sectionContent += `<ul>${subItems}</ul>`;
                         }
@@ -487,30 +651,28 @@
 
                 if (sectionContent) {
                     if (!isFirstActualSection) reportParts.push('<br>');
-                    reportParts.push(`<div><b>${details.emoji} ${details.name.toUpperCase()}</b></div>`);
+                    reportParts.push(`<div><b>${details.emoji} ${details.name}</b></div>`);
                     reportParts.push(`<ul>${sectionContent}</ul>`);
                     isFirstActualSection = false;
                 }
             }
 
             if (!hasContent) {
-                showAlert('Please fill in at least one item in any category before generating the report.'); 
+                showAlert('Please fill in at least one item in any category before generating the report.');
                 return;
             }
 
             DOM.outputText.innerHTML = reportParts.join('');
             DOM.outputSection.classList.remove('hidden');
             DOM.outputSection.classList.add('fade-in');
-            
-            // Performance: Use passive scroll listener
+
             DOM.outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        
+
         function copyToClipboard() {
             const btn = document.getElementById('copyBtn');
             const originalHTML = btn.innerHTML;
-            
-            // Performance: Use modern Clipboard API with fallback
+
             if (navigator.clipboard && window.ClipboardItem) {
                 const blob = new Blob([DOM.outputText.innerHTML], { type: 'text/html' });
                 const textBlob = new Blob([DOM.outputText.innerText], { type: 'text/plain' });
@@ -520,13 +682,12 @@
                         'text/plain': textBlob
                     })
                 ]).catch(() => {
-                    // Fallback for browsers that don't support ClipboardItem properly
                     fallbackCopy();
                 });
             } else {
                 fallbackCopy();
             }
-            
+
             function fallbackCopy() {
                 const listener = (e) => {
                     e.preventDefault();
@@ -540,7 +701,7 @@
 
             btn.innerHTML = '<svg class="icon-sm mr-1.5"><use href="#icon-check"/></svg>Copied!';
             btn.classList.add('copied');
-            
+
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
                 btn.classList.remove('copied');
@@ -548,28 +709,24 @@
         }
 
         function saveDraft() {
-            const draftData = {};
-            for (const id of categoryKeys) {
-                const inputsContainer = document.getElementById(id + '-inputs');
-                const mainItemWrappers = inputsContainer.querySelectorAll('.main-item-wrapper');
-                draftData[id] = [];
-                
-                mainItemWrappers.forEach(wrapper => {
-                    const mainPointInput = wrapper.querySelector('.main-point');
-                    if (mainPointInput?.value.trim()) {
-                        const subpoints = Array.from(wrapper.querySelectorAll('.sub-point'))
-                            .filter(sub => sub.value.trim())
-                            .map(sub => sub.value);
-                        
-                        draftData[id].push({
-                            text: mainPointInput.value,
-                            subpoints
-                        });
+            saveDraftSilent();
+            showAlert('Snapshot saved!');
+        }
+
+        // Validate the shape of parsed draft data before it touches the DOM.
+        function isValidDraftShape(data) {
+            if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+            for (const key in data) {
+                const items = data[key];
+                if (!Array.isArray(items)) return false;
+                for (const item of items) {
+                    if (!item || typeof item.text !== 'string' || !Array.isArray(item.subpoints)) return false;
+                    for (const sub of item.subpoints) {
+                        if (typeof sub !== 'string') return false;
                     }
-                });
+                }
             }
-            localStorage.setItem('meetingNotesDraft', JSON.stringify(draftData));
-            showAlert('Draft saved successfully!');
+            return true;
         }
 
         function loadDraft() {
@@ -578,95 +735,125 @@
                 showAlert('No saved draft found.');
                 return;
             }
-            
-            const parsedData = JSON.parse(draftData);
-            
-            // Performance: Batch DOM updates
-            for (const id of categoryKeys) {
-                const inputsContainer = document.getElementById(id + '-inputs');
-                inputsContainer.innerHTML = '';
+
+            let parsedData;
+            try {
+                parsedData = JSON.parse(draftData);
+                if (!isValidDraftShape(parsedData)) throw new Error('Invalid draft structure');
+                applyDraftData(parsedData);
+            } catch (err) {
+                showAlert('Saved notes could not be read. The corrupted draft was removed.');
+                localStorage.removeItem('meetingNotesDraft');
+                lastSavedAt = null;
+                updateSaveStatus();
+                return;
             }
 
-            for (const id in parsedData) {
-                const inputsContainer = document.getElementById(id + '-inputs');
-                const items = parsedData[id];
-
-                if (items.length === 0) {
-                    addMainItem(inputsContainer, categoryDetails[id].placeholder);
-                } else {
-                    items.forEach(itemData => {
-                        const itemWrapper = addMainItem(inputsContainer, categoryDetails[id].placeholder);
-                        const mainInput = itemWrapper.querySelector('.main-point');
-                        mainInput.value = itemData.text;
-
-                        itemData.subpoints.forEach(subpointText => {
-                            addSubItem(itemWrapper, 'Enter subpoint...');
-                            const subInputs = itemWrapper.querySelectorAll('.sub-point');
-                            subInputs[subInputs.length - 1].value = subpointText;
-                        });
-                    });
-                }
-            }
             showAlert('Draft loaded successfully!');
             DOM.draftNotification.innerHTML = '';
+            DOM.draftNotification.classList.add('hidden');
         }
 
-        // Performance: Use event delegation for button clicks
+        // Event wiring
         document.getElementById('generateBtn').addEventListener('click', generateReport);
         document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
         document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
         document.getElementById('clearAllBtn').addEventListener('click', requestClearAllConfirmation);
         document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
 
-        // Initial setup with performance optimizations
+        // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
-            // Performance: Use DocumentFragment for batch DOM insertion
+            // Show the target Wednesday in the composing UI
+            DOM.targetDate.textContent = getNextWednesday().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+            // Build grouped, collapsible category sections
             const fragment = document.createDocumentFragment();
-            
-            for (const id of categoryKeys) {
-                const details = categoryDetails[id];
-                const categoryElement = document.createElement('div');
-                categoryElement.className = 'category bg-slate-50 p-6 rounded-lg shadow-md border-l-4 border-slate-200';
-                categoryElement.innerHTML = `
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 flex items-center">${details.emoji} ${details.name}</h3>
-                    <div id="${id}-inputs" class="space-y-3"></div>
-                    <div class="flex items-center gap-4 mt-4">
-                        <button type="button" class="add-item-btn text-base font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center" data-category="${id}">
-                            <svg class="icon mr-2"><use href="#icon-plus"/></svg>
-                            Add Item
-                        </button>
-                    </div>
-                `;
-                fragment.appendChild(categoryElement);
-            }
-            
+            const navLinks = [];
+
+            categoryGroups.forEach((group) => {
+                const slug = group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+                const details = document.createElement('details');
+                details.className = 'group-section group border-t border-slate-200 pt-6 first:border-t-0 first:pt-0';
+                details.id = 'group-' + slug;
+                details.open = true;
+
+                const summary = document.createElement('summary');
+                summary.className = 'cursor-pointer list-none flex items-center justify-between py-1 select-none';
+                summary.innerHTML = `<h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">${group.emoji} ${group.title}</h2><span class="text-slate-400 text-sm transition-transform group-open:rotate-180" aria-hidden="true">▾</span>`;
+
+                const body = document.createElement('div');
+                body.className = 'pt-4 space-y-6';
+
+                group.keys.forEach(id => {
+                    const cat = categoryDetails[id];
+                    const categoryElement = document.createElement('div');
+                    categoryElement.className = 'category';
+                    categoryElement.innerHTML = `
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">${cat.emoji} ${cat.name}</h3>
+                        <div id="${id}-inputs" class="space-y-3"></div>
+                        <div class="mt-3">
+                            <button type="button" class="add-item-btn text-sm font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg transition-all duration-200 flex items-center" data-category="${id}">
+                                <svg class="icon-sm mr-1.5"><use href="#icon-plus"/></svg>
+                                Add Item
+                            </button>
+                        </div>`;
+                    body.appendChild(categoryElement);
+                });
+
+                details.appendChild(summary);
+                details.appendChild(body);
+                fragment.appendChild(details);
+                navLinks.push({ slug, label: `${group.emoji} ${group.title}` });
+            });
+
             DOM.categoriesContainer.appendChild(fragment);
-            
-            // Performance: Single event listener with delegation for all "Add Item" buttons
+
+            // In-page anchor nav
+            DOM.groupNav.innerHTML = navLinks.map(l =>
+                `<a href="#group-${l.slug}" class="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">${l.label}</a>`
+            ).join('');
+
+            // Event delegation for all "Add Item" buttons
             DOM.categoriesContainer.addEventListener('click', (e) => {
                 const addBtn = e.target.closest('.add-item-btn');
                 if (addBtn) {
                     const categoryId = addBtn.dataset.category;
                     const inputsContainer = document.getElementById(`${categoryId}-inputs`);
-                    addMainItem(inputsContainer, categoryDetails[categoryId].placeholder);
+                    addMainItem(inputsContainer, categoryDetails[categoryId].placeholder, `${categoryDetails[categoryId].name} item`);
                 }
             });
-            
+
             // Initialize each category with one input
             for (const id of categoryKeys) {
                 const inputsContainer = document.getElementById(`${id}-inputs`);
-                addMainItem(inputsContainer, categoryDetails[id].placeholder);
+                addMainItem(inputsContainer, categoryDetails[id].placeholder, `${categoryDetails[id].name} item`);
             }
 
-            // Show draft notification if exists
-            if (localStorage.getItem('meetingNotesDraft')) {
-                DOM.draftNotification.innerHTML = `
-                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-                        <p class="font-bold">Saved Draft Found</p>
-                        <p>You have a previously saved draft. Click "Load Draft" to restore it.</p>
-                    </div>
-                `;
+            // Collapse "How to Use" if previously dismissed
+            if (localStorage.getItem('howToDismissed') === '1') {
+                DOM.howToUseDetails.open = false;
             }
+            DOM.howToUseDetails.addEventListener('toggle', () => {
+                localStorage.setItem('howToDismissed', DOM.howToUseDetails.open ? '0' : '1');
+            });
+
+            // Draft found notice
+            if (localStorage.getItem('meetingNotesDraft')) {
+                DOM.draftNotification.classList.remove('hidden');
+                DOM.draftNotification.innerHTML = `
+                    <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 px-4 py-3 rounded-lg" role="status">
+                        <svg class="icon mt-0.5 text-amber-600 flex-shrink-0"><use href="#icon-folder"/></svg>
+                        <div class="text-sm text-amber-900">
+                            <p class="font-bold">Saved draft found</p>
+                            <p>You have a previously saved draft. Click "Load Draft" to restore it.</p>
+                        </div>
+                    </div>`;
+            }
+
+            // Keep save status fresh
+            setInterval(updateSaveStatus, 5000);
+            updateSaveStatus();
         });
     </script>
 </body>

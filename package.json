@@ -1,0 +1,14 @@
+{
+  "name": "bucks-church-meeting-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bucks Church Meeting Notes generator",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./dist/styles.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./dist/styles.css --watch",
+    "build": "npm run build:css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
