@@ -138,6 +138,30 @@
             padding: 0.15rem 0.4rem;
             white-space: nowrap;
         }
+
+        /* Print: show only the generated report, cleanly */
+        @media print {
+            .header,
+            #groupNav,
+            #howToUseDetails,
+            #categories-container,
+            .form-actions,
+            #draft-notification-area,
+            .output-actions,
+            #shortcutsPopover,
+            #undoToast,
+            #statusToast,
+            #customModal { display: none !important; }
+
+            body { background: #ffffff !important; padding: 0 !important; display: block !important; align-items: stretch !important; justify-content: flex-start !important; }
+            .container { box-shadow: none !important; border-radius: 0 !important; max-width: 100% !important; margin: 0 !important; overflow: visible !important; }
+            main.form-container { padding: 0 !important; }
+            .fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+            #outputSection { border: 0 !important; margin: 0 !important; }
+            #outputText { font-size: 12pt !important; color: #1e293b !important; }
+            #outputText, #outputText * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #outputText ul { padding-left: 1.5rem; }
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
@@ -174,6 +198,9 @@
             </symbol>
             <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </symbol>
+            <symbol id="icon-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
             </symbol>
         </defs>
     </svg>
@@ -222,7 +249,7 @@
             <div id="categories-container" class="space-y-2"></div>
 
             <!-- Action Buttons: Generate is primary; Clear All is demoted (destructive outline) -->
-            <div class="flex flex-col gap-3 mt-8">
+            <div class="form-actions flex flex-col gap-3 mt-8">
                 <button class="generate-btn w-full flex items-center justify-center bg-green-700 hover:bg-green-800 text-white text-lg font-bold py-4 px-6 rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" id="generateBtn">
                     <svg class="icon mr-2"><use href="#icon-plus-circle"/></svg>
                     ✨ Generate Meeting Notes
@@ -245,12 +272,18 @@
 
             <!-- Output Section -->
             <section class="output-section mt-10 pt-6 border-t border-slate-200 hidden" id="outputSection">
-                <div class="output-header flex justify-between items-center mb-4">
+                <div class="output-header flex flex-wrap justify-between items-center gap-2 mb-4">
                     <h2 id="outputTitle" class="text-xl font-bold text-slate-800">Your Meeting Notes</h2>
-                    <button class="copy-btn bg-sky-700 hover:bg-sky-800 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" id="copyBtn">
-                        <svg class="icon-sm mr-1.5"><use href="#icon-copy"/></svg>
-                        Copy to Clipboard
-                    </button>
+                    <div class="output-actions flex flex-wrap gap-2 items-center">
+                        <button type="button" id="printBtn" class="print-btn bg-slate-700 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors flex items-center text-sm">
+                            <svg class="icon-sm mr-1.5"><use href="#icon-print"/></svg>
+                            Print
+                        </button>
+                        <button class="copy-btn bg-sky-700 hover:bg-sky-800 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" id="copyBtn">
+                            <svg class="icon-sm mr-1.5"><use href="#icon-copy"/></svg>
+                            Copy to Clipboard
+                        </button>
+                    </div>
                 </div>
                 <div class="output-text text-slate-700 text-sm" id="outputText"></div>
             </section>
@@ -940,6 +973,13 @@
             DOM.outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        function printReport() {
+            // Ensure the report is generated first (alerts if empty).
+            if (DOM.outputSection.classList.contains('hidden')) generateReport();
+            if (DOM.outputSection.classList.contains('hidden')) return;
+            window.print();
+        }
+
         function copyToClipboard() {
             const btn = document.getElementById('copyBtn');
             const originalHTML = btn.innerHTML;
@@ -1158,6 +1198,7 @@
         document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
         document.getElementById('clearAllBtn').addEventListener('click', requestClearAllConfirmation);
         document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+        document.getElementById('printBtn').addEventListener('click', printReport);
 
         // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
