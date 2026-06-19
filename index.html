@@ -105,6 +105,22 @@
         .icon { display: inline-block; width: 1.25rem; height: 1.25rem; }
         .icon-sm { width: 1rem; height: 1rem; }
 
+        /* Drag-and-drop reordering */
+        .drag-handle {
+            cursor: grab;
+            color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            touch-action: none;
+        }
+        .drag-handle:hover { color: #64748b; background: #f1f5f9; }
+        .drag-handle:active { cursor: grabbing; }
+        .drag-handle:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 2px; }
+        .dragging { opacity: 0.4; }
+        .drop-indicator { box-shadow: 0 -2px 0 0 var(--accent-green); }
+
         /* Native disclosure: remove default marker (custom chevron used) */
         summary { list-style: none; }
         summary::-webkit-details-marker { display: none; }
@@ -138,6 +154,10 @@
             <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </symbol>
+            <symbol id="icon-grip" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="9" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" />
+                <circle cx="15" cy="6" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="15" cy="18" r="1.6" />
+            </symbol>
         </defs>
     </svg>
 
@@ -169,6 +189,7 @@
                 <ol class="list-decimal list-inside space-y-1 text-sm md:text-base text-slate-700 pt-3 pl-1">
                     <li>Your notes <b>auto-save</b> as you type.</li>
                     <li>Use "Add Item" for a new bullet point and "Add Subpoint" for an indented bullet.</li>
+                    <li>Drag the grip handle (or use Up/Down arrows) to reorder items and subpoints.</li>
                     <li>Click "💾 Save snapshot" to save a named copy of your progress.</li>
                     <li>Click "✨ Generate Meeting Notes" to create your report.</li>
                 </ol>
@@ -432,6 +453,103 @@
             return btn;
         }
 
+        // --- Drag-and-drop reordering (native DnD + keyboard fallback) ---
+        let dragState = null; // { el, selector, endMarker }
+
+        function getDragAfterElement(container, selector, y) {
+            const els = Array.from(container.querySelectorAll(selector)).filter(el => el !== dragState.el);
+            let closest = { offset: -Infinity, element: null };
+            for (const el of els) {
+                const box = el.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) closest = { offset, element: el };
+            }
+            return closest.element;
+        }
+
+        function clearDropIndicators(container, selector) {
+            if (!container) return;
+            container.querySelectorAll(selector).forEach(el => el.classList.remove('drop-indicator'));
+        }
+
+        function moveItemInContainer(item, selector, endMarker, clientY) {
+            const container = item.parentElement;
+            if (!container) return;
+            clearDropIndicators(container, selector);
+            const afterEl = getDragAfterElement(container, selector, clientY);
+            if (afterEl) container.insertBefore(item, afterEl);
+            else if (endMarker) container.insertBefore(item, endMarker);
+            else container.appendChild(item);
+            scheduleAutoSave();
+        }
+
+        // Keyboard reorder within the item's own container
+        function moveItemByStep(item, selector, endMarker, direction) {
+            const container = item.parentElement;
+            if (!container) return;
+            const siblings = Array.from(container.querySelectorAll(selector));
+            const idx = siblings.indexOf(item);
+            if (direction === 'up' && idx > 0) {
+                container.insertBefore(item, siblings[idx - 1]);
+            } else if (direction === 'down' && idx >= 0 && idx < siblings.length - 1) {
+                const after = siblings[idx + 2] || endMarker || null;
+                if (after) container.insertBefore(item, after);
+                else container.appendChild(item);
+            } else {
+                return;
+            }
+            scheduleAutoSave();
+        }
+
+        function setupDragHandle(handle, item, selector, endMarkerGetter) {
+            handle.setAttribute('role', 'button');
+            handle.setAttribute('aria-label', 'Drag to reorder');
+            handle.setAttribute('tabindex', '0');
+            handle.setAttribute('title', 'Drag to reorder (or use Up/Down arrows)');
+            handle.draggable = true;
+
+            handle.addEventListener('dragstart', (e) => {
+                dragState = { el: item, selector, endMarker: endMarkerGetter ? endMarkerGetter() : null };
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', 'reorder');
+                try { e.dataTransfer.setDragImage(item, 24, 24); } catch (_) {}
+                item.classList.add('dragging');
+            });
+            handle.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                if (dragState && dragState.el === item) clearDropIndicators(item.parentElement, selector);
+                dragState = null;
+            });
+            handle.addEventListener('keydown', (e) => {
+                if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+                e.preventDefault();
+                moveItemByStep(item, selector, endMarkerGetter ? endMarkerGetter() : null, e.key === 'ArrowUp' ? 'up' : 'down');
+                handle.focus();
+            });
+        }
+
+        function createDragHandle() {
+            const handle = document.createElement('span');
+            handle.className = 'drag-handle flex-shrink-0';
+            handle.innerHTML = '<svg class="icon-sm" aria-hidden="true"><use href="#icon-grip"/></svg>';
+            return handle;
+        }
+
+        document.addEventListener('dragover', (e) => {
+            if (!dragState) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const container = dragState.el.parentElement;
+            clearDropIndicators(container, dragState.selector);
+            const afterEl = getDragAfterElement(container, dragState.selector, e.clientY);
+            if (afterEl) afterEl.classList.add('drop-indicator');
+        });
+        document.addEventListener('drop', (e) => {
+            if (!dragState) return;
+            e.preventDefault();
+            moveItemInContainer(dragState.el, dragState.selector, dragState.endMarker, e.clientY);
+        });
+
         function addMainItem(container, placeholder, label) {
             const itemWrapper = document.createElement('div');
             itemWrapper.className = 'main-item-wrapper mt-2';
@@ -443,6 +561,10 @@
                 'main-point flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all duration-200 text-sm placeholder-slate-400',
                 placeholder, label);
 
+            const handle = createDragHandle();
+            setupDragHandle(handle, itemWrapper, '.main-item-wrapper', null);
+
+            inputGroup.appendChild(handle);
             inputGroup.appendChild(newInput);
             inputGroup.appendChild(createRemoveButton(() => itemWrapper.remove(), 'Remove item'));
             itemWrapper.appendChild(inputGroup);
@@ -464,6 +586,10 @@
                 'sub-point flex-grow p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all duration-200 text-sm placeholder-slate-400',
                 placeholder, 'Subpoint');
 
+            const handle = createDragHandle();
+            setupDragHandle(handle, subItemGroup, '.sub-item-group', () => parentWrapper.querySelector('.add-subpoint-btn'));
+
+            subItemGroup.appendChild(handle);
             subItemGroup.appendChild(newInput);
             subItemGroup.appendChild(createRemoveButton(() => subItemGroup.remove(), 'Remove subpoint'));
             parentWrapper.appendChild(subItemGroup);
