@@ -124,6 +124,20 @@
         /* Native disclosure: remove default marker (custom chevron used) */
         summary { list-style: none; }
         summary::-webkit-details-marker { display: none; }
+
+        /* Keyboard key chip (used in How-to-Use and the shortcuts popover) */
+        .kbd {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.7rem;
+            line-height: 1;
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            border-bottom-width: 2px;
+            border-radius: 0.375rem;
+            padding: 0.15rem 0.4rem;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
@@ -158,6 +172,9 @@
                 <circle cx="9" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" />
                 <circle cx="15" cy="6" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="15" cy="18" r="1.6" />
             </symbol>
+            <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </symbol>
         </defs>
     </svg>
 
@@ -189,10 +206,16 @@
                 <ol class="list-decimal list-inside space-y-1 text-sm md:text-base text-slate-700 pt-3 pl-1">
                     <li>Your notes <b>auto-save</b> as you type.</li>
                     <li>Use "Add Item" for a new bullet point and "Add Subpoint" for an indented bullet.</li>
-                    <li>Drag the grip handle (or use Up/Down arrows) to reorder items and subpoints.</li>
+                    <li>Drag the grip handle, or use <kbd class="kbd">Alt</kbd>+<kbd class="kbd">Up</kbd>/<kbd class="kbd">Down</kbd>, to reorder items and subpoints.</li>
                     <li>Click "💾 Save snapshot" to save a named copy of your progress.</li>
                     <li>Click "✨ Generate Meeting Notes" to create your report.</li>
                 </ol>
+                <div class="pt-3">
+                    <button type="button" id="shortcutsBtn" class="inline-flex items-center gap-1 text-sm font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 py-2 px-3 rounded-lg transition-colors" aria-haspopup="dialog" aria-expanded="false" aria-controls="shortcutsPopover">
+                        ⌨️ Keyboard shortcuts
+                    </button>
+                    <p class="text-xs text-slate-500 mt-2">Press <kbd class="kbd">?</kbd> to see all shortcuts, or <kbd class="kbd">/</kbd> to search notes.</p>
+                </div>
             </details>
 
             <!-- Categories grouped into collapsible sections -->
@@ -252,6 +275,25 @@
     <!-- Transient status toast (non-destructive feedback) -->
     <div id="statusToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[109] bg-white border border-slate-200 shadow-lg rounded-full px-5 py-3 items-center gap-2" role="status" aria-live="polite"></div>
 
+    <!-- Keyboard shortcuts popover (non-modal) -->
+    <div id="shortcutsPopover" class="hidden fixed top-4 right-4 z-[108] w-72 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 shadow-xl rounded-xl p-4" role="dialog" aria-modal="false" aria-label="Keyboard shortcuts">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-bold text-slate-800">⌨️ Shortcuts</h3>
+            <button type="button" id="shortcutsCloseBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-100 transition-colors" aria-label="Close shortcuts">
+                <svg class="icon-sm"><use href="#icon-x"/></svg>
+            </button>
+        </div>
+        <ul class="space-y-1.5 text-sm text-slate-700">
+            <li class="flex justify-between gap-2"><span>Save snapshot</span><kbd class="kbd">Ctrl/Cmd+S</kbd></li>
+            <li class="flex justify-between gap-2"><span>Generate report</span><kbd class="kbd">Ctrl/Cmd+Enter</kbd></li>
+            <li class="flex justify-between gap-2"><span>New item (in a filled row)</span><kbd class="kbd">Enter</kbd></li>
+            <li class="flex justify-between gap-2"><span>Move row up or down</span><kbd class="kbd">Alt+Up/Down</kbd></li>
+            <li class="flex justify-between gap-2"><span>Search notes</span><kbd class="kbd">/</kbd></li>
+            <li class="flex justify-between gap-2"><span>Show this list</span><kbd class="kbd">?</kbd></li>
+            <li class="flex justify-between gap-2"><span>Close overlays</span><kbd class="kbd">Esc</kbd></li>
+        </ul>
+    </div>
+
     <script>
         'use strict';
 
@@ -271,7 +313,11 @@
             statusToast: document.getElementById('statusToast'),
             howToUseDetails: document.getElementById('howToUseDetails'),
             targetDate: document.getElementById('targetDate'),
-            groupNav: document.getElementById('groupNav')
+            groupNav: document.getElementById('groupNav'),
+            shortcutsPopover: document.getElementById('shortcutsPopover'),
+            shortcutsBtn: document.getElementById('shortcutsBtn'),
+            shortcutsCloseBtn: document.getElementById('shortcutsCloseBtn'),
+            searchInput: document.getElementById('categorySearch')
         };
 
         // Category metadata (keys unchanged; report + persistence rely on these)
@@ -978,6 +1024,133 @@
             DOM.draftNotification.innerHTML = '';
             DOM.draftNotification.classList.add('hidden');
         }
+
+        // --- Keyboard shortcuts + Shortcuts popover ---
+        function isTextField(el) {
+            if (!el) return false;
+            if (el.isContentEditable) return true;
+            const tag = el.tagName;
+            return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+        }
+
+        let shortcutsLastFocused = null;
+        function shortcutsPopoverOpen() {
+            return !DOM.shortcutsPopover.classList.contains('hidden');
+        }
+        function openShortcuts() {
+            shortcutsLastFocused = document.activeElement;
+            DOM.shortcutsPopover.classList.remove('hidden');
+            DOM.shortcutsBtn.setAttribute('aria-expanded', 'true');
+            DOM.shortcutsCloseBtn.focus({ preventScroll: true });
+        }
+        function closeShortcuts() {
+            if (!shortcutsPopoverOpen()) return;
+            DOM.shortcutsPopover.classList.add('hidden');
+            DOM.shortcutsBtn.setAttribute('aria-expanded', 'false');
+            if (shortcutsLastFocused && typeof shortcutsLastFocused.focus === 'function') {
+                shortcutsLastFocused.focus();
+                shortcutsLastFocused = null;
+            }
+        }
+        function toggleShortcuts() {
+            shortcutsPopoverOpen() ? closeShortcuts() : openShortcuts();
+        }
+
+        DOM.shortcutsBtn.addEventListener('click', toggleShortcuts);
+        DOM.shortcutsCloseBtn.addEventListener('click', closeShortcuts);
+        document.addEventListener('click', (e) => {
+            if (!shortcutsPopoverOpen()) return;
+            if (DOM.shortcutsPopover.contains(e.target) || DOM.shortcutsBtn.contains(e.target)) return;
+            closeShortcuts();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const mod = e.ctrlKey || e.metaKey;
+
+            // Ctrl/Cmd+S -> save snapshot (prevent the browser save dialog)
+            if (mod && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+                saveDraft();
+                return;
+            }
+            // Ctrl/Cmd+Enter -> generate report
+            if (mod && e.key === 'Enter') {
+                e.preventDefault();
+                generateReport();
+                return;
+            }
+
+            // Alt+Up / Alt+Down -> reorder the focused row (field-scoped; touch-friendly)
+            if (e.altKey && !mod && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                const field = document.activeElement;
+                const dir = e.key === 'ArrowUp' ? 'up' : 'down';
+                if (field && field.matches('.main-point')) {
+                    e.preventDefault();
+                    moveItemByStep(field.closest('.main-item-wrapper'), '.main-item-wrapper', null, dir);
+                    field.focus();
+                    return;
+                }
+                if (field && field.matches('.sub-point')) {
+                    const group = field.closest('.sub-item-group');
+                    const endMarker = group.parentElement.querySelector('.add-subpoint-btn');
+                    e.preventDefault();
+                    moveItemByStep(group, '.sub-item-group', endMarker, dir);
+                    field.focus();
+                    return;
+                }
+            }
+
+            // Enter on a non-empty main-point -> add another item in the same category
+            if (!mod && !e.altKey && !e.shiftKey && e.key === 'Enter') {
+                const field = e.target;
+                if (field && field.matches('.main-point') && field.value.trim() !== '') {
+                    e.preventDefault();
+                    const wrapper = field.closest('.main-item-wrapper');
+                    const inputsContainer = wrapper.parentElement;
+                    const catId = inputsContainer.id.replace(/-inputs$/, '');
+                    const details = categoryDetails[catId];
+                    const placeholder = details ? details.placeholder : 'Enter item...';
+                    const label = details ? details.name + ' item' : 'Item';
+                    const newItem = addMainItem(inputsContainer, placeholder, label);
+                    if (newItem !== wrapper.nextSibling) {
+                        inputsContainer.insertBefore(newItem, wrapper.nextSibling);
+                    }
+                    return;
+                }
+            }
+
+            // Esc -> close overlays (search/popover). The modal closes itself.
+            if (e.key === 'Escape') {
+                if (!DOM.modal.classList.contains('hidden')) return;
+                let handled = false;
+                if (DOM.searchInput && document.activeElement === DOM.searchInput) {
+                    DOM.searchInput.blur();
+                    handled = true;
+                }
+                if (shortcutsPopoverOpen()) {
+                    closeShortcuts();
+                    handled = true;
+                }
+                if (handled) e.preventDefault();
+                return;
+            }
+
+            // Single-key shortcuts only when NOT typing in a text field
+            if (isTextField(e.target)) return;
+
+            if (e.key === '/') {
+                if (DOM.searchInput) {
+                    e.preventDefault();
+                    DOM.searchInput.focus();
+                }
+                return;
+            }
+            if (e.key === '?') {
+                e.preventDefault();
+                toggleShortcuts();
+                return;
+            }
+        });
 
         // Event wiring
         document.getElementById('generateBtn').addEventListener('click', generateReport);
