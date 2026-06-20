@@ -223,6 +223,9 @@
             <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
             </symbol>
+            <symbol id="icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </symbol>
         </defs>
     </svg>
 
@@ -244,12 +247,12 @@
 
             <!-- How to use (collapsible, collapses after first dismiss) -->
             <details class="group" id="howToUseDetails" open>
-                <summary class="cursor-pointer list-none flex items-center justify-between py-1 select-none">
+                <summary class="cursor-pointer list-none flex items-center justify-between py-2 -mx-2 px-2 rounded-lg select-none hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600">
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 text-sky-700"><svg class="icon-sm"><use href="#icon-info"/></svg></span>
                         How to Use This Tool
                     </h2>
-                    <span class="text-slate-400 text-sm transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
+                    <svg class="icon text-slate-400 transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><use href="#icon-chevron"/></svg>
                 </summary>
                 <ol class="list-decimal list-inside space-y-1 text-sm md:text-base text-slate-700 pt-3 pl-1">
                     <li>Your notes <b>auto-save</b> as you type.</li>
@@ -278,6 +281,13 @@
                     </div>
                     <span id="searchCount" class="text-xs text-slate-500 font-semibold whitespace-nowrap" role="status" aria-live="polite"></span>
                 </div>
+            </div>
+
+            <!-- Condense the view: collapse or expand every category group at once -->
+            <div class="flex justify-end pb-1">
+                <button type="button" id="collapseAllBtn" class="inline-flex items-center text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 py-1.5 px-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600" aria-label="Collapse all category sections">
+                    Collapse all
+                </button>
             </div>
 
             <!-- Categories grouped into collapsible sections -->
@@ -410,7 +420,8 @@
             exportMenu: document.getElementById('exportMenu'),
             exportHtmlBtn: document.getElementById('exportHtmlBtn'),
             exportDocBtn: document.getElementById('exportDocBtn'),
-            exportPdfBtn: document.getElementById('exportPdfBtn')
+            exportPdfBtn: document.getElementById('exportPdfBtn'),
+            collapseAllBtn: document.getElementById('collapseAllBtn')
         };
 
         // Category metadata (keys unchanged; report + persistence rely on these)
@@ -1276,6 +1287,19 @@
             }
         }
 
+        // --- Collapse / expand all category groups (condense the view) ---
+        function setAllGroupSectionsOpen(open) {
+            document.querySelectorAll('.group-section').forEach(d => { d.open = open; });
+        }
+        function syncCollapseAllLabel() {
+            if (!DOM.collapseAllBtn) return;
+            const groups = document.querySelectorAll('.group-section');
+            if (!groups.length) return;
+            const allOpen = Array.from(groups).every(d => d.open);
+            DOM.collapseAllBtn.textContent = allOpen ? 'Collapse all' : 'Expand all';
+            DOM.collapseAllBtn.setAttribute('aria-label', allOpen ? 'Collapse all category sections' : 'Expand all category sections');
+        }
+
         function generateReport() {
             const { html, hasContent } = buildReportHTML();
             if (!hasContent) {
@@ -1662,6 +1686,14 @@
         document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
         document.getElementById('printBtn').addEventListener('click', printReport);
         document.getElementById('emailBtn').addEventListener('click', emailReport);
+        if (DOM.collapseAllBtn) {
+            DOM.collapseAllBtn.addEventListener('click', () => {
+                const groups = document.querySelectorAll('.group-section');
+                const allOpen = Array.from(groups).every(d => d.open);
+                setAllGroupSectionsOpen(!allOpen);
+                syncCollapseAllLabel();
+            });
+        }
         if (DOM.searchInput) {
             DOM.searchInput.addEventListener('input', () => {
                 clearTimeout(searchDebounce);
@@ -1696,8 +1728,8 @@
                 details.open = true;
 
                 const summary = document.createElement('summary');
-                summary.className = 'cursor-pointer list-none flex items-center justify-between py-1 select-none';
-                summary.innerHTML = `<h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">${group.emoji} ${group.title}</h2><span class="text-slate-400 text-sm transition-transform group-open:rotate-180" aria-hidden="true">▾</span>`;
+                summary.className = 'cursor-pointer list-none flex items-center justify-between py-2 -mx-2 px-2 rounded-lg select-none hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600';
+                summary.innerHTML = `<h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">${group.emoji} ${group.title}</h2><svg class="icon text-slate-400 transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><use href="#icon-chevron"/></svg>`;
 
                 const body = document.createElement('div');
                 body.className = 'pt-4 space-y-6';
@@ -1725,6 +1757,12 @@
             });
 
             DOM.categoriesContainer.appendChild(fragment);
+
+            // Keep the Collapse/Expand-all toggle label in sync as groups open/close.
+            document.querySelectorAll('.group-section').forEach(d => {
+                d.addEventListener('toggle', syncCollapseAllLabel);
+            });
+            syncCollapseAllLabel();
 
             // In-page anchor nav
             DOM.groupNav.innerHTML = navLinks.map(l =>
