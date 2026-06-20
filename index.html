@@ -105,6 +105,11 @@
         .icon { display: inline-block; width: 1.25rem; height: 1.25rem; }
         .icon-sm { width: 1rem; height: 1rem; }
 
+        /* Search: highlight ring on matching categories (outline, not a side-stripe) */
+        .search-hit { outline: 2px solid var(--accent-sky); outline-offset: 2px; border-radius: 0.5rem; }
+        /* Suppress the native WebKit search cancel button (we provide our own) */
+        input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+
         /* Drag-and-drop reordering */
         .drag-handle {
             cursor: grab;
@@ -145,6 +150,7 @@
             #groupNav,
             #howToUseDetails,
             #categories-container,
+            .search-bar,
             .form-actions,
             #draft-notification-area,
             .output-actions,
@@ -208,6 +214,9 @@
             <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </symbol>
+            <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </symbol>
         </defs>
     </svg>
 
@@ -250,6 +259,20 @@
                     <p class="text-xs text-slate-500 mt-2">Press <kbd class="kbd">?</kbd> to see all shortcuts, or <kbd class="kbd">/</kbd> to search notes.</p>
                 </div>
             </details>
+
+            <!-- Quick category search / filter -->
+            <div class="search-bar sticky top-2 z-20 bg-white pb-1">
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <svg class="icon-sm absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true"><use href="#icon-search"/></svg>
+                        <input type="search" id="categorySearch" class="w-full pl-9 pr-9 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600" placeholder="Search categories and notes (press /)" aria-label="Search categories and notes" autocomplete="off">
+                        <button type="button" id="searchClearBtn" class="hidden absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600" aria-label="Clear search">
+                            <svg class="icon-sm"><use href="#icon-x"/></svg>
+                        </button>
+                    </div>
+                    <span id="searchCount" class="text-xs text-slate-500 font-semibold whitespace-nowrap" role="status" aria-live="polite"></span>
+                </div>
+            </div>
 
             <!-- Categories grouped into collapsible sections -->
             <div id="categories-container" class="space-y-2"></div>
@@ -378,6 +401,8 @@
             shortcutsBtn: document.getElementById('shortcutsBtn'),
             shortcutsCloseBtn: document.getElementById('shortcutsCloseBtn'),
             searchInput: document.getElementById('categorySearch'),
+            searchClearBtn: document.getElementById('searchClearBtn'),
+            searchCount: document.getElementById('searchCount'),
             exportBtn: document.getElementById('exportBtn'),
             exportMenu: document.getElementById('exportMenu'),
             exportHtmlBtn: document.getElementById('exportHtmlBtn'),
@@ -1071,6 +1096,47 @@
             printReport();
         }
 
+        // --- Quick category search / filter (live, debounced; safe with autosave + DnD) ---
+        let searchDebounce = null;
+        function runCategorySearch() {
+            const q = (DOM.searchInput.value || '').trim().toLowerCase();
+            DOM.searchClearBtn.classList.toggle('hidden', q.length === 0);
+            const groups = DOM.categoriesContainer.querySelectorAll('.group-section');
+            if (!q) {
+                DOM.categoriesContainer.querySelectorAll('.category').forEach(cat => {
+                    cat.style.display = '';
+                    cat.classList.remove('search-hit');
+                });
+                groups.forEach(g => { g.style.display = ''; });
+                DOM.searchCount.textContent = '';
+                return;
+            }
+            let matchCount = 0;
+            groups.forEach(group => {
+                let groupHasMatch = false;
+                group.querySelectorAll('.category').forEach(cat => {
+                    const name = (cat.querySelector('h3') ? cat.querySelector('h3').textContent : '').toLowerCase();
+                    const inName = name.includes(q);
+                    const inNotes = Array.from(cat.querySelectorAll('.main-point, .sub-point'))
+                        .some(i => (i.value || '').toLowerCase().includes(q));
+                    if (inName || inNotes) {
+                        cat.style.display = '';
+                        cat.classList.add('search-hit');
+                        matchCount++;
+                        groupHasMatch = true;
+                    } else {
+                        cat.style.display = 'none';
+                        cat.classList.remove('search-hit');
+                    }
+                });
+                group.style.display = groupHasMatch ? '' : 'none';
+                if (groupHasMatch) group.open = true; // reveal matches inside collapsed groups
+            });
+            DOM.searchCount.textContent = matchCount === 0
+                ? 'No matches'
+                : (matchCount + (matchCount === 1 ? ' category matches' : ' categories match'));
+        }
+
         function copyToClipboard() {
             const btn = document.getElementById('copyBtn');
             const originalHTML = btn.innerHTML;
@@ -1289,6 +1355,8 @@
                 if (!DOM.modal.classList.contains('hidden')) return;
                 let handled = false;
                 if (DOM.searchInput && document.activeElement === DOM.searchInput) {
+                    DOM.searchInput.value = '';
+                    runCategorySearch();
                     DOM.searchInput.blur();
                     handled = true;
                 }
@@ -1325,6 +1393,21 @@
         document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
         document.getElementById('printBtn').addEventListener('click', printReport);
         document.getElementById('emailBtn').addEventListener('click', emailReport);
+        if (DOM.searchInput) {
+            DOM.searchInput.addEventListener('input', () => {
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(runCategorySearch, 150);
+            });
+            // 'search' event covers native clear (Esc inside the field on some browsers)
+            DOM.searchInput.addEventListener('search', runCategorySearch);
+        }
+        if (DOM.searchClearBtn) {
+            DOM.searchClearBtn.addEventListener('click', () => {
+                DOM.searchInput.value = '';
+                runCategorySearch();
+                DOM.searchInput.focus();
+            });
+        }
 
         // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
