@@ -609,8 +609,8 @@
         function createSubpointButton(parentWrapper, placeholder) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'add-subpoint-btn ml-8 mt-1 text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center';
-            btn.innerHTML = '<svg class="icon-sm mr-1"><use href="#icon-plus"/></svg> Add Subpoint';
+            btn.className = 'add-subpoint-btn ml-8 mt-2 inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 py-1 px-3 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600';
+            btn.innerHTML = '<svg class="icon-sm" aria-hidden="true"><use href="#icon-plus"/></svg><span>Add subpoint</span>';
             btn.onclick = () => addSubItem(parentWrapper, placeholder);
             return btn;
         }
