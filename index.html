@@ -286,29 +286,23 @@
             <!-- Action Buttons: Generate is primary; Clear All is demoted (destructive outline) -->
             <div class="form-actions flex flex-col gap-3 mt-8">
                 <button class="generate-btn w-full flex items-center justify-center bg-green-700 hover:bg-green-800 text-white text-lg font-bold py-4 px-6 rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" id="generateBtn">
-                    <svg class="icon mr-2"><use href="#icon-plus-circle"/></svg>
                     ✨ Generate Meeting Notes
                 </button>
                 <div class="flex flex-wrap gap-3 justify-center">
                     <button type="button" class="flex-1 min-w-[8rem] flex items-center justify-center bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" id="saveDraftBtn">
-                        <svg class="icon mr-2"><use href="#icon-save"/></svg>
                         💾 Save snapshot
                     </button>
                     <button type="button" class="flex-1 min-w-[8rem] flex items-center justify-center bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" id="loadDraftBtn">
-                        <svg class="icon mr-2"><use href="#icon-folder"/></svg>
                         📂 Load Draft
                     </button>
                     <button type="button" id="startFromLastWeekBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-                        <svg class="icon mr-2"><use href="#icon-calendar"/></svg>
                         🗓️ Start from last week
                     </button>
                     <button type="button" id="shareBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-sky-700">
-                        <svg class="icon mr-2"><use href="#icon-share"/></svg>
                         🔗 Share
                     </button>
                     <button type="button" id="clearAllBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 border-2 border-red-200 font-semibold py-3 px-5 rounded-lg transition-all duration-200 hover:-translate-y-0.5">
-                        <svg class="icon mr-2"><use href="#icon-trash"/></svg>
-                        Clear All Notes
+                        🗑️ Clear All Notes
                     </button>
                 </div>
             </div>
@@ -319,20 +313,16 @@
                     <h2 id="outputTitle" class="text-xl font-bold text-slate-800">Your Meeting Notes</h2>
                     <div class="output-actions flex flex-wrap gap-2 items-center">
                         <button type="button" id="printBtn" class="print-btn bg-slate-700 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors flex items-center text-sm">
-                            <svg class="icon-sm mr-1.5"><use href="#icon-print"/></svg>
-                            Print
+                            🖨️ Print
                         </button>
                         <button class="copy-btn bg-sky-700 hover:bg-sky-800 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" id="copyBtn">
-                            <svg class="icon-sm mr-1.5"><use href="#icon-copy"/></svg>
-                            Copy to Clipboard
+                            📋 Copy to Clipboard
                         </button>
                         <button type="button" id="emailBtn" class="bg-sky-700 hover:bg-sky-800 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm">
-                            <svg class="icon-sm mr-1.5"><use href="#icon-mail"/></svg>
                             ✉️ Email
                         </button>
                         <div class="relative">
                             <button type="button" id="exportBtn" class="bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center text-sm" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu">
-                                <svg class="icon-sm mr-1.5"><use href="#icon-download"/></svg>
                                 ⬇️ Export
                             </button>
                             <div id="exportMenu" class="hidden absolute right-0 top-full mt-1 w-52 bg-white border border-slate-200 shadow-lg rounded-md py-1 z-[90]" role="menu" aria-labelledby="exportBtn">
