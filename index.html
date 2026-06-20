@@ -217,6 +217,9 @@
             <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </symbol>
+            <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </symbol>
         </defs>
     </svg>
 
@@ -291,6 +294,10 @@
                     <button type="button" class="flex-1 min-w-[8rem] flex items-center justify-center bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" id="loadDraftBtn">
                         <svg class="icon mr-2"><use href="#icon-folder"/></svg>
                         📂 Load Draft
+                    </button>
+                    <button type="button" id="startFromLastWeekBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                        <svg class="icon mr-2"><use href="#icon-calendar"/></svg>
+                        🗓️ Start from last week
                     </button>
                     <button type="button" id="clearAllBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 border-2 border-red-200 font-semibold py-3 px-5 rounded-lg transition-all duration-200 hover:-translate-y-0.5">
                         <svg class="icon mr-2"><use href="#icon-trash"/></svg>
@@ -1156,12 +1163,72 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
+        function weekKeyOf(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+        function currentWeekKey() {
+            return weekKeyOf(getNextWednesday());
+        }
         function reportDateStamp() {
-            const d = getNextWednesday();
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return y + '-' + m + '-' + day;
+            return currentWeekKey();
+        }
+
+        // --- Weekly archive ("Start from last week") ---
+        // Carry-forward: drop action items already marked done; keep open ones.
+        function stripDoneActions(data) {
+            let clone;
+            try { clone = JSON.parse(JSON.stringify(data)); } catch (_) { clone = {}; }
+            for (const id in clone) {
+                if (Array.isArray(clone[id])) {
+                    clone[id] = clone[id].filter(item => !(item && item.action && item.action.done === true));
+                }
+            }
+            return clone;
+        }
+        function readArchive() {
+            try {
+                const raw = localStorage.getItem('meetingNotesArchive');
+                if (!raw) return {};
+                const parsed = JSON.parse(raw);
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+            } catch (_) { return {}; }
+        }
+        function writeArchive(archive) {
+            try { localStorage.setItem('meetingNotesArchive', JSON.stringify(archive)); } catch (_) {}
+        }
+        function archiveCurrentWeek() {
+            try {
+                const archive = readArchive();
+                archive[currentWeekKey()] = { data: gatherDraftData(), savedAt: Date.now() };
+                writeArchive(archive);
+            } catch (_) {}
+        }
+        function startFromLastWeek() {
+            const key = currentWeekKey();
+            const archive = readArchive();
+            const prevKeys = Object.keys(archive).filter(k => k < key).sort();
+            const prevEntry = prevKeys.length ? archive[prevKeys[prevKeys.length - 1]] : null;
+            const prevData = prevEntry && isValidDraftShape(prevEntry.data) ? prevEntry.data : null;
+            if (!prevData) {
+                showToast('No previous week found to start from.', { icon: '🗓️' });
+                return;
+            }
+            const template = stripDoneActions(prevData);
+            const applyTemplate = () => {
+                applyDraftData(template);
+                saveDraftSilent();
+                showToast('Loaded last week as a starting point. Open action items carried over.', { icon: '🗓️' });
+            };
+            const current = gatherDraftData();
+            const hasContent = categoryKeys.some(id => current[id] && current[id].length > 0);
+            if (hasContent) {
+                showConfirmation('Start from last week? This replaces your current notes with last week as a starting point.', applyTemplate);
+            } else {
+                applyTemplate();
+            }
         }
 
         function generateReport() {
@@ -1171,6 +1238,7 @@
                 return;
             }
             DOM.outputText.innerHTML = html;
+            archiveCurrentWeek();
             DOM.outputSection.classList.remove('hidden');
             DOM.outputSection.classList.add('fade-in');
 
@@ -1325,6 +1393,7 @@
 
         function saveDraft() {
             saveDraftSilent();
+            archiveCurrentWeek();
             showToast('Snapshot saved', { icon: '💾' });
         }
 
@@ -1542,6 +1611,7 @@
         document.getElementById('generateBtn').addEventListener('click', generateReport);
         document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
         document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
+        document.getElementById('startFromLastWeekBtn').addEventListener('click', startFromLastWeek);
         document.getElementById('clearAllBtn').addEventListener('click', requestClearAllConfirmation);
         document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
         document.getElementById('printBtn').addEventListener('click', printReport);
@@ -1630,6 +1700,22 @@
                 const inputsContainer = document.getElementById(`${id}-inputs`);
                 addMainItem(inputsContainer, categoryDetails[id].placeholder, `${categoryDetails[id].name} item`);
             }
+
+            // One-time weekly archive migration (guarded + idempotent; never throws).
+            // Seeds "this week" from an existing live draft the first time the archive is seen.
+            try {
+                if (!localStorage.getItem('meetingNotesArchive')) {
+                    const draftRaw = localStorage.getItem('meetingNotesDraft');
+                    if (draftRaw) {
+                        const parsed = JSON.parse(draftRaw);
+                        if (isValidDraftShape(parsed)) {
+                            const archive = {};
+                            archive[currentWeekKey()] = { data: parsed, savedAt: Date.now() };
+                            localStorage.setItem('meetingNotesArchive', JSON.stringify(archive));
+                        }
+                    }
+                }
+            } catch (_) {}
 
             // Collapse "How to Use" if previously dismissed
             if (localStorage.getItem('howToDismissed') === '1') {
