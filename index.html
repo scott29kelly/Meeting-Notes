@@ -220,6 +220,9 @@
             <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
             </symbol>
+            <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+            </symbol>
         </defs>
     </svg>
 
@@ -298,6 +301,10 @@
                     <button type="button" id="startFromLastWeekBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                         <svg class="icon mr-2"><use href="#icon-calendar"/></svg>
                         🗓️ Start from last week
+                    </button>
+                    <button type="button" id="shareBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-sky-700 hover:bg-sky-800 text-white font-semibold py-3 px-5 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-sky-700">
+                        <svg class="icon mr-2"><use href="#icon-share"/></svg>
+                        🔗 Share
                     </button>
                     <button type="button" id="clearAllBtn" class="flex-1 min-w-[8rem] flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 border-2 border-red-200 font-semibold py-3 px-5 rounded-lg transition-all duration-200 hover:-translate-y-0.5">
                         <svg class="icon mr-2"><use href="#icon-trash"/></svg>
@@ -1231,6 +1238,55 @@
             }
         }
 
+        // --- Share via link (shares the current draft, not the report) ---
+        // URL-safe base64 of a UTF-8-safe JSON payload. The escape/unescape pair is
+        // deprecated but dependency-free and reliable for this transform (locked decision #4).
+        function encodeShare(draft) {
+            const json = JSON.stringify(draft);
+            const b64 = btoa(unescape(encodeURIComponent(json)));
+            return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        function decodeShare(payload) {
+            let b64 = String(payload).replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4) b64 += '=';
+            return decodeURIComponent(escape(atob(b64)));
+        }
+        function shareLink() {
+            const url = location.origin + location.pathname + '#s=' + encodeShare(gatherDraftData());
+            if (url.length > 4000) {
+                showToast('This share link is long; some browsers or email apps may shorten it.', { icon: '🔗', duration: 5000 });
+            }
+            copyText(url);
+            showToast('Share link copied to clipboard.', { icon: '🔗' });
+        }
+        // Import a shared draft from a #s= link. Runs on load once categories are ready;
+        // named so it stays testable. Wrapped so any failure becomes a friendly toast.
+        function applySharedFromHash() {
+            try {
+                if (location.hash.indexOf('#s=') !== 0) return;
+                const stripHash = () => history.replaceState(null, '', location.pathname + location.search);
+                let shared = null;
+                try {
+                    shared = JSON.parse(decodeShare(location.hash.slice(3)));
+                } catch (_) { shared = null; }
+                if (!isValidDraftShape(shared)) {
+                    showToast('The shared link could not be read.', { icon: '⚠️' });
+                    stripHash();
+                    return;
+                }
+                const hasContent = categoryKeys.some(id => (gatherDraftData()[id] || []).length > 0);
+                const doLoad = () => { applyDraftData(shared); stripHash(); };
+                if (hasContent) {
+                    showConfirmation('Load shared notes from the link? This replaces your current notes.', doLoad);
+                } else {
+                    doLoad();
+                }
+            } catch (_) {
+                showToast('The shared link could not be read.', { icon: '⚠️' });
+                history.replaceState(null, '', location.pathname + location.search);
+            }
+        }
+
         function generateReport() {
             const { html, hasContent } = buildReportHTML();
             if (!hasContent) {
@@ -1612,6 +1668,7 @@
         document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
         document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
         document.getElementById('startFromLastWeekBtn').addEventListener('click', startFromLastWeek);
+        document.getElementById('shareBtn').addEventListener('click', shareLink);
         document.getElementById('clearAllBtn').addEventListener('click', requestClearAllConfirmation);
         document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
         document.getElementById('printBtn').addEventListener('click', printReport);
@@ -1716,6 +1773,9 @@
                     }
                 }
             } catch (_) {}
+
+            // Import a shared draft from a #s= link (after categories + migration are ready).
+            applySharedFromHash();
 
             // Collapse "How to Use" if previously dismissed
             if (localStorage.getItem('howToDismissed') === '1') {
