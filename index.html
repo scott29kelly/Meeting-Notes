@@ -496,7 +496,16 @@
                         const subpoints = Array.from(wrapper.querySelectorAll('.sub-point'))
                             .filter(sub => sub.value.trim())
                             .map(sub => sub.value);
-                        draftData[id].push({ text: mainPointInput.value, subpoints });
+                        const item = { text: mainPointInput.value, subpoints };
+                        const action = readActionFromWrapper(wrapper);
+                        if (action) {
+                            const a = {};
+                            if (action.owner) a.owner = action.owner;
+                            if (action.due) a.due = action.due;
+                            if (action.done) a.done = true;
+                            item.action = a;
+                        }
+                        draftData[id].push(item);
                     }
                 });
             }
@@ -511,7 +520,7 @@
 
         // Listen for input changes to trigger auto-save
         document.addEventListener('input', (e) => {
-            if (e.target.matches('.main-point, .sub-point')) {
+            if (e.target.matches('.main-point, .sub-point, .action-owner, .action-due, .action-done')) {
                 scheduleAutoSave();
             }
         });
@@ -613,6 +622,75 @@
             btn.innerHTML = '<svg class="icon-sm" aria-hidden="true"><use href="#icon-plus"/></svg><span>Add subpoint</span>';
             btn.onclick = () => addSubItem(parentWrapper, placeholder);
             return btn;
+        }
+
+        // --- Action items (optional owner / due / done per main item) ---
+        function createActionRow() {
+            const row = document.createElement('div');
+            row.className = 'action-row hidden mt-2 flex flex-wrap items-center gap-2 bg-sky-50 border border-sky-100 rounded-lg p-2';
+
+            const owner = createInputElement('text',
+                'action-owner flex-grow min-w-[8rem] min-h-[44px] p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-sky-600 focus:border-sky-600 text-sm placeholder-slate-400',
+                'Owner (optional)', 'Action owner');
+
+            const due = createInputElement('date',
+                'action-due min-h-[44px] p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-sky-600 focus:border-sky-600 text-sm',
+                '', 'Action due date');
+
+            const label = document.createElement('label');
+            label.className = 'inline-flex items-center gap-1.5 text-sm text-slate-700 px-1 min-h-[44px]';
+            const done = document.createElement('input');
+            done.type = 'checkbox';
+            done.className = 'action-done h-5 w-5 rounded border-slate-300 text-sky-600 focus:ring-2 focus:ring-sky-600 cursor-pointer';
+            done.setAttribute('aria-label', 'Mark this action item done');
+            label.appendChild(done);
+            label.appendChild(document.createTextNode('Done'));
+
+            row.appendChild(owner);
+            row.appendChild(due);
+            row.appendChild(label);
+            return row;
+        }
+
+        function createActionToggleButton(itemWrapper) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'action-toggle-btn mt-2 inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 py-1 px-3 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600';
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.innerHTML = '<svg class="icon-sm" aria-hidden="true"><use href="#icon-check"/></svg><span>Action</span>';
+            btn.onclick = () => {
+                const row = itemWrapper.querySelector('.action-row');
+                if (!row) return;
+                const pressed = btn.getAttribute('aria-pressed') === 'true';
+                if (pressed) {
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.setAttribute('aria-expanded', 'false');
+                    row.classList.add('hidden');
+                } else {
+                    btn.setAttribute('aria-pressed', 'true');
+                    btn.setAttribute('aria-expanded', 'true');
+                    row.classList.remove('hidden');
+                    const owner = row.querySelector('.action-owner');
+                    if (owner) requestAnimationFrame(() => owner.focus());
+                }
+                scheduleAutoSave();
+            };
+            return btn;
+        }
+
+        // Returns null when the action toggle is off; otherwise the action field values.
+        function readActionFromWrapper(wrapper) {
+            const toggle = wrapper.querySelector('.action-toggle-btn');
+            if (!toggle || toggle.getAttribute('aria-pressed') !== 'true') return null;
+            const owner = wrapper.querySelector('.action-owner');
+            const due = wrapper.querySelector('.action-due');
+            const done = wrapper.querySelector('.action-done');
+            return {
+                owner: owner && owner.value.trim() ? owner.value.trim() : '',
+                due: due && due.value ? due.value : '',
+                done: !!(done && done.checked)
+            };
         }
 
         // --- Drag-and-drop reordering (native DnD + keyboard fallback) ---
@@ -730,6 +808,8 @@
             inputGroup.appendChild(newInput);
             inputGroup.appendChild(createRemoveButton(() => itemWrapper.remove(), 'Remove item'));
             itemWrapper.appendChild(inputGroup);
+            itemWrapper.appendChild(createActionToggleButton(itemWrapper));
+            itemWrapper.appendChild(createActionRow());
             itemWrapper.appendChild(createSubpointButton(itemWrapper, 'Enter subpoint...'));
             container.appendChild(itemWrapper);
 
@@ -804,6 +884,19 @@
                             const subInputs = itemWrapper.querySelectorAll('.sub-point');
                             subInputs[subInputs.length - 1].value = subpointText;
                         });
+
+                        if (itemData.action && typeof itemData.action === 'object') {
+                            const toggle = itemWrapper.querySelector('.action-toggle-btn');
+                            const row = itemWrapper.querySelector('.action-row');
+                            if (toggle && row) {
+                                toggle.setAttribute('aria-pressed', 'true');
+                                toggle.setAttribute('aria-expanded', 'true');
+                                row.classList.remove('hidden');
+                                if (typeof itemData.action.owner === 'string') row.querySelector('.action-owner').value = itemData.action.owner;
+                                if (typeof itemData.action.due === 'string') row.querySelector('.action-due').value = itemData.action.due;
+                                if (itemData.action.done === true) row.querySelector('.action-done').checked = true;
+                            }
+                        }
                     });
                 }
             }
@@ -903,6 +996,7 @@
                 '<hr><br>'
             ];
             let isFirstActualSection = true;
+            const actionItems = [];
 
             for (const id of categoryKeys) {
                 const details = categoryDetails[id];
@@ -916,7 +1010,18 @@
 
                     if (mainPointInput?.value.trim()) {
                         hasContent = true;
-                        sectionContent += `<li>${sanitizeHTML(mainPointInput.value.trim())}`;
+                        const action = readActionFromWrapper(wrapper);
+                        let prefix = '';
+                        let suffix = '';
+                        if (action) {
+                            prefix = action.done ? '✅ ' : '☐ ';
+                            const meta = [];
+                            if (action.owner) meta.push('Owner: ' + sanitizeHTML(action.owner));
+                            if (action.due) meta.push('Due: ' + sanitizeHTML(action.due));
+                            if (meta.length) suffix = ' <span style="color:#475569;">(' + meta.join(' · ') + ')</span>';
+                            actionItems.push({ text: mainPointInput.value.trim(), owner: action.owner, due: action.due, done: !!action.done, catName: details.name });
+                        }
+                        sectionContent += `<li>${prefix}${sanitizeHTML(mainPointInput.value.trim())}${suffix}`;
 
                         const subItems = Array.from(subPointInputs)
                             .filter(sub => sub.value.trim())
@@ -938,6 +1043,24 @@
                 }
             }
 
+            // Aggregated Action Items section: open items first, then done (de-emphasized).
+            if (actionItems.length) {
+                if (!isFirstActualSection) reportParts.push('<br>');
+                reportParts.push('<div><b>✅ Action Items</b></div>');
+                const open = actionItems.filter(a => !a.done);
+                const doneItems = actionItems.filter(a => a.done);
+                const lis = open.concat(doneItems).map(a => {
+                    const marker = a.done ? '✅' : '☐';
+                    const bits = [sanitizeHTML(a.text)];
+                    if (a.owner) bits.push(sanitizeHTML(a.owner));
+                    if (a.due) bits.push(sanitizeHTML(a.due));
+                    const inner = marker + ' ' + bits.join(' · ') + ' (' + sanitizeHTML(a.catName) + ')';
+                    return '<li>' + (a.done ? '<span style="text-decoration:line-through;color:#94a3b8;">' + inner + '</span>' : inner) + '</li>';
+                }).join('');
+                reportParts.push('<ul>' + lis + '</ul>');
+                isFirstActualSection = false;
+            }
+
             return { html: reportParts.join(''), hasContent };
         }
 
@@ -946,6 +1069,7 @@
             lines.push('Bucks Church | Staff Meeting Notes');
             lines.push(getNextWednesday().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
             lines.push('');
+            const actionItems = [];
             for (const id of categoryKeys) {
                 const details = categoryDetails[id];
                 const inputsContainer = document.getElementById(id + '-inputs');
@@ -955,7 +1079,17 @@
                 mainItemWrappers.forEach(wrapper => {
                     const mainPointInput = wrapper.querySelector('.main-point');
                     if (!mainPointInput?.value.trim()) return;
-                    sectionLines.push('  - ' + mainPointInput.value.trim());
+                    const action = readActionFromWrapper(wrapper);
+                    const marker = action ? (action.done ? '✅ ' : '☐ ') : '';
+                    let line = '  - ' + marker + mainPointInput.value.trim();
+                    if (action) {
+                        const meta = [];
+                        if (action.owner) meta.push('Owner: ' + action.owner);
+                        if (action.due) meta.push('Due: ' + action.due);
+                        if (meta.length) line += ' (' + meta.join(' · ') + ')';
+                        actionItems.push({ text: mainPointInput.value.trim(), owner: action.owner, due: action.due, done: !!action.done, catName: details.name });
+                    }
+                    sectionLines.push(line);
                     Array.from(wrapper.querySelectorAll('.sub-point'))
                         .filter(sub => sub.value.trim())
                         .forEach(sub => sectionLines.push('      - ' + sub.value.trim()));
@@ -965,6 +1099,19 @@
                     lines.push(...sectionLines);
                     lines.push('');
                 }
+            }
+            if (actionItems.length) {
+                lines.push('✅ Action Items');
+                const open = actionItems.filter(a => !a.done);
+                const doneItems = actionItems.filter(a => a.done);
+                open.concat(doneItems).forEach(a => {
+                    const marker = a.done ? '✅' : '☐';
+                    const bits = [a.text];
+                    if (a.owner) bits.push(a.owner);
+                    if (a.due) bits.push(a.due);
+                    lines.push('  - ' + marker + ' ' + bits.join(' · ') + ' (' + a.catName + ')');
+                });
+                lines.push('');
             }
             return lines.join('\n');
         }
@@ -1191,6 +1338,12 @@
                     if (!item || typeof item.text !== 'string' || !Array.isArray(item.subpoints)) return false;
                     for (const sub of item.subpoints) {
                         if (typeof sub !== 'string') return false;
+                    }
+                    if (item.action !== undefined) {
+                        if (!item.action || typeof item.action !== 'object' || Array.isArray(item.action)) return false;
+                        if ('owner' in item.action && typeof item.action.owner !== 'string') return false;
+                        if ('due' in item.action && typeof item.action.due !== 'string') return false;
+                        if ('done' in item.action && typeof item.action.done !== 'boolean') return false;
                     }
                 }
             }
