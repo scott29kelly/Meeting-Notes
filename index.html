@@ -19,7 +19,7 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Built Tailwind CSS (replaces runtime CDN JIT) -->
-    <link rel="stylesheet" href="dist/styles.css?v=2">
+    <link rel="stylesheet" href="dist/styles.css?v=4">
 
     <style>
         /* Theming tokens: peppy palette using accessible (corrected) values */
@@ -286,7 +286,7 @@
             </div>
 
             <!-- Categories grouped into collapsible sections -->
-            <div id="categories-container" class="space-y-2"></div>
+            <div id="categories-container" class="space-y-6"></div>
 
             <!-- Action Buttons: Generate is primary; Clear All is demoted (destructive outline) -->
             <div class="form-actions flex flex-col gap-3 mt-8">
@@ -1718,7 +1718,7 @@
                 const slug = group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
                 const details = document.createElement('details');
-                details.className = 'group-section group border-t border-slate-200 pt-6 first:border-t-0 first:pt-0';
+                details.className = 'group-section group border-t-2 border-slate-300 pt-6 first:border-t-0 first:pt-0';
                 details.id = 'group-' + slug;
                 details.open = true;
 
