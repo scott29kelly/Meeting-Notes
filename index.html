@@ -19,7 +19,7 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Built Tailwind CSS (replaces runtime CDN JIT) -->
-    <link rel="stylesheet" href="dist/styles.css?v=5">
+    <link rel="stylesheet" href="dist/styles.css?v=6">
 
     <style>
         :root {
@@ -375,12 +375,18 @@
     </svg>
 
     <div class="container bg-white w-full max-w-3xl mx-auto rounded-xl shadow-2xl overflow-hidden fade-in">
-        <!-- Header -->
-        <header class="header bg-gradient-to-r from-green-700 to-emerald-800 text-white p-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">🏛️ Bucks Church Meeting Notes</h1>
-            <p class="text-base md:text-lg opacity-90">Simple Meeting Notes Generator</p>
-            <p class="text-sm md:text-base mt-1 opacity-90">✍️ Composing for: <span id="targetDate"></span></p>
-            <div id="saveStatus" class="mt-3 inline-block bg-black/15 text-white rounded-full px-3 py-1 text-sm font-medium">💬 Auto-save on</div>
+        <!-- Header: light app chrome (Direction B); green brand retained via logo badge -->
+        <header class="header border-b border-[color:var(--border)] px-6 py-4">
+            <div class="flex items-center gap-3">
+                <span aria-hidden="true" class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-green-700 to-emerald-800 text-2xl shrink-0">🏛️</span>
+                <div class="min-w-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-[color:var(--text)] leading-tight truncate">Bucks Church Meeting Notes</h1>
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-[color:var(--text-muted)]">
+                        <span>✍️ Composing for: <span id="targetDate" class="font-medium text-[color:var(--text)]"></span></span>
+                        <span id="saveStatus" class="chip" aria-live="polite">💬 Auto-save on</span>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <main class="form-container p-6 md:p-10 space-y-8">
