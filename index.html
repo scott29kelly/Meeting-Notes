@@ -19,7 +19,7 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Built Tailwind CSS (replaces runtime CDN JIT) -->
-    <link rel="stylesheet" href="dist/styles.css?v=7">
+    <link rel="stylesheet" href="dist/styles.css?v=8">
 
     <style>
         :root {
@@ -768,7 +768,7 @@
         function createRemoveButton(onClick, ariaLabel) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'p-2.5 text-red-600 hover:text-red-700 rounded-md hover:bg-red-50 transition-colors duration-150';
+            btn.className = 'remove-btn inline-flex items-center justify-center w-11 h-11 text-[color:var(--danger)] hover:bg-[color:var(--danger-tint)] rounded-md transition-colors duration-150';
             btn.setAttribute('aria-label', ariaLabel || 'Remove item');
             btn.innerHTML = '<svg class="icon"><use href="#icon-trash"/></svg>';
             btn.onclick = onClick;
@@ -778,7 +778,7 @@
         function createSubpointButton(parentWrapper, placeholder) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'add-subpoint-btn ml-8 mt-2 inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 py-1 px-3 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600';
+            btn.className = 'add-subpoint-btn btn-ghost mt-2 ml-2 text-xs py-1.5 px-3';
             btn.innerHTML = '<svg class="icon-sm" aria-hidden="true"><use href="#icon-plus"/></svg><span>Add subpoint</span>';
             btn.onclick = () => addSubItem(parentWrapper, placeholder);
             return btn;
@@ -787,21 +787,21 @@
         // --- Action items (optional owner / due / done per main item) ---
         function createActionRow() {
             const row = document.createElement('div');
-            row.className = 'action-row hidden mt-2 flex flex-wrap items-center gap-2 bg-sky-50 border border-sky-100 rounded-lg p-2';
+            row.className = 'action-row hidden mt-2 flex flex-wrap items-center gap-2 bg-[color:var(--surface-2)] border border-[color:var(--border)] rounded-lg p-2';
 
             const owner = createInputElement('text',
-                'action-owner flex-grow min-w-[8rem] min-h-[44px] p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-sky-600 focus:border-sky-600 text-sm placeholder-slate-400',
+                'action-owner field-input flex-grow min-w-[8rem]',
                 'Owner (optional)', 'Action owner');
 
             const due = createInputElement('date',
-                'action-due min-h-[44px] p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-sky-600 focus:border-sky-600 text-sm',
+                'action-due field-input min-w-[8rem]',
                 '', 'Action due date');
 
             const label = document.createElement('label');
-            label.className = 'inline-flex items-center gap-1.5 text-sm text-slate-700 px-1 min-h-[44px]';
+            label.className = 'inline-flex items-center gap-1.5 text-sm text-[color:var(--text-muted)] px-1 min-h-[44px]';
             const done = document.createElement('input');
             done.type = 'checkbox';
-            done.className = 'action-done h-5 w-5 rounded border-slate-300 text-sky-600 focus:ring-2 focus:ring-sky-600 cursor-pointer';
+            done.className = 'action-done h-5 w-5 rounded border-slate-300 text-[color:var(--info)] focus:ring-2 focus:ring-[color:var(--info)] cursor-pointer';
             done.setAttribute('aria-label', 'Mark this action item done');
             label.appendChild(done);
             label.appendChild(document.createTextNode('Done'));
@@ -815,7 +815,7 @@
         function createActionToggleButton(itemWrapper) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'action-toggle-btn mt-2 inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 py-1 px-3 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600';
+            btn.className = 'action-toggle-btn btn-ghost mt-2 ml-1 text-xs py-1.5 px-3';
             btn.setAttribute('aria-pressed', 'false');
             btn.setAttribute('aria-expanded', 'false');
             btn.innerHTML = '<svg class="icon-sm" aria-hidden="true"><use href="#icon-check"/></svg><span>Action</span>';
@@ -958,7 +958,7 @@
             inputGroup.className = 'flex items-center space-x-2';
 
             const newInput = createInputElement('text',
-                'main-point flex-grow p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all duration-200 text-sm placeholder-slate-400',
+                'main-point field-input flex-grow',
                 placeholder, label);
 
             const handle = createDragHandle();
@@ -978,14 +978,21 @@
         }
 
         function addSubItem(parentWrapper, placeholder) {
-            const existingSubpointBtn = parentWrapper.querySelector('.add-subpoint-btn');
+            const existingSubpointBtn = parentWrapper.querySelector(':scope > .add-subpoint-btn');
             if (existingSubpointBtn) existingSubpointBtn.remove();
 
+            let subArea = parentWrapper.querySelector(':scope > .subpoints-area');
+            if (!subArea) {
+                subArea = document.createElement('div');
+                subArea.className = 'subpoints-area mt-2 ml-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--surface-2)] p-2 space-y-2';
+                parentWrapper.appendChild(subArea);
+            }
+
             const subItemGroup = document.createElement('div');
-            subItemGroup.className = 'sub-item-group ml-8 mt-2 flex items-center space-x-2';
+            subItemGroup.className = 'sub-item-group flex items-center space-x-2';
 
             const newInput = createInputElement('text',
-                'sub-point flex-grow p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all duration-200 text-sm placeholder-slate-400',
+                'sub-point field-input flex-grow',
                 placeholder, 'Subpoint');
 
             const handle = createDragHandle();
@@ -993,8 +1000,12 @@
 
             subItemGroup.appendChild(handle);
             subItemGroup.appendChild(newInput);
-            subItemGroup.appendChild(createRemoveButton(() => subItemGroup.remove(), 'Remove subpoint'));
-            parentWrapper.appendChild(subItemGroup);
+            subItemGroup.appendChild(createRemoveButton(() => {
+                subItemGroup.remove();
+                const area = parentWrapper.querySelector(':scope > .subpoints-area');
+                if (area && !area.querySelector('.sub-item-group')) area.remove();
+            }, 'Remove subpoint'));
+            subArea.appendChild(subItemGroup);
             parentWrapper.appendChild(createSubpointButton(parentWrapper, placeholder));
 
             requestAnimationFrame(() => newInput.focus());
@@ -1888,9 +1899,9 @@
                         <h3 class="text-lg font-semibold text-[color:var(--text)] mb-3 flex items-center gap-2"><span class="chip" aria-hidden="true">${cat.emoji}</span>${cat.name}</h3>
                         <div id="${id}-inputs" class="space-y-3 rounded-lg bg-[color:var(--surface-2)] p-3"></div>
                         <div class="mt-3">
-                            <button type="button" class="add-item-btn text-sm font-semibold text-green-700 bg-green-100 hover:bg-green-200 py-2 px-4 rounded-lg transition-all duration-200 flex items-center" data-category="${id}">
-                                <svg class="icon-sm mr-1.5"><use href="#icon-plus"/></svg>
-                                Add Item
+                            <button type="button" class="add-item-btn btn-ghost w-full justify-center border border-dashed border-[color:var(--border-strong)] text-sm" data-category="${id}">
+                                <svg class="icon-sm"><use href="#icon-plus"/></svg>
+                                Add item
                             </button>
                         </div>`;
                     body.appendChild(categoryElement);
