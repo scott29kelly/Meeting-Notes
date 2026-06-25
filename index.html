@@ -19,7 +19,7 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Built Tailwind CSS (replaces runtime CDN JIT) -->
-    <link rel="stylesheet" href="dist/styles.css?v=8">
+    <link rel="stylesheet" href="dist/styles.css?v=9">
 
     <style>
         :root {
@@ -197,6 +197,36 @@
             color: #ffffff !important;
         }
 
+        /* Sticky action bar: primary actions stay reachable while scrolling.
+           Border-top divider + upward shadow, no competing card bg (nested-card safe). */
+        .action-bar {
+            position: sticky;
+            bottom: 0;
+            z-index: 30;
+            background-color: var(--surface);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -6px 14px -8px rgba(15, 23, 42, .18);
+            padding: .75rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Smooth native <details> disclosure: CSS-only grid-rows transition (no JS timers).
+           Open animates 0fr -> 1fr; content is fully visible when open. */
+        .disclosure {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows .2s ease;
+        }
+        details[open] > .disclosure { grid-template-rows: 1fr; }
+        .disclosure > .disclosure__inner { overflow: hidden; min-height: 0; }
+
+        /* Toast entrance: transform + opacity only (no layout props). */
+        @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, .5rem); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-in { animation: toastIn .18s ease-out; }
+
         .modal {
             position: fixed;
             z-index: 100;
@@ -208,7 +238,6 @@
             background-color: var(--modal-overlay);
             padding-top: 60px;
             contain: layout style;
-            will-change: opacity;
         }
         .modal-content {
             background-color: var(--surface);
@@ -281,6 +310,8 @@
         @media (prefers-reduced-motion: reduce) {
             .fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
             .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover { transform: none !important; }
+            .disclosure { transition: none !important; }
+            .toast-in { animation: none !important; }
             html { scroll-behavior: auto !important; }
             *, *::before, *::after {
                 animation-duration: .001ms !important;
@@ -405,13 +436,17 @@
                     </h2>
                     <svg class="icon text-slate-400 transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><use href="#icon-chevron"/></svg>
                 </summary>
-                <ol class="list-decimal list-inside space-y-1 text-sm md:text-base text-slate-700 pt-3 pl-1">
-                    <li>Your notes <b>auto-save</b> as you type.</li>
-                    <li>Use "Add Item" for a new bullet point and "Add Subpoint" for an indented bullet.</li>
-                    <li>Drag the grip handle, or use <kbd class="kbd">Alt</kbd>+<kbd class="kbd">Up</kbd>/<kbd class="kbd">Down</kbd>, to reorder items and subpoints.</li>
-                    <li>Click "💾 Save snapshot" to save a named copy of your progress.</li>
-                    <li>Click "✨ Generate Meeting Notes" to create your report.</li>
-                </ol>
+                <div class="disclosure">
+                    <div class="disclosure__inner">
+                        <ol class="list-decimal list-inside space-y-1 text-sm md:text-base text-slate-700 pt-3 pl-1">
+                            <li>Your notes <b>auto-save</b> as you type.</li>
+                            <li>Use "Add Item" for a new bullet point and "Add Subpoint" for an indented bullet.</li>
+                            <li>Drag the grip handle, or use <kbd class="kbd">Alt</kbd>+<kbd class="kbd">Up</kbd>/<kbd class="kbd">Down</kbd>, to reorder items and subpoints.</li>
+                            <li>Click "💾 Save snapshot" to save a named copy of your progress.</li>
+                            <li>Click "✨ Generate Meeting Notes" to create your report.</li>
+                        </ol>
+                    </div>
+                </div>
             </details>
 
             <!-- Search + shortcuts: one polished sticky toolbar -->
@@ -439,8 +474,10 @@
             <!-- Categories grouped into collapsible sections -->
             <div id="categories-container" class="space-y-6"></div>
 
-            <!-- Action Buttons: Generate is primary; Clear All is demoted (destructive outline) -->
-            <div class="form-actions flex flex-col gap-3 mt-8">
+            <!-- Sticky action bar: Generate is primary; all primary actions stay visible
+                 (nesting them in a closed "More" menu would hide buttons the keyboard/screen-reader
+                 flow and the test suite reach by id). Responsive wrap on small screens. -->
+            <div class="form-actions action-bar flex flex-col gap-3">
                 <button class="btn-primary generate-btn w-full text-lg" id="generateBtn">
                     ✨ Generate Meeting Notes
                 </button>
@@ -607,6 +644,37 @@
         let autoSaveTimeout;
         let lastSavedAt = null;
 
+        // --- Collapse-state persistence (fold-in) ---
+        const COLLAPSE_KEY = 'meetingNotesCollapse';
+        function readCollapseMap() {
+            try {
+                const raw = localStorage.getItem(COLLAPSE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : null;
+            } catch (_) { return null; }
+        }
+        function writeCollapseMap() {
+            try {
+                const map = {};
+                document.querySelectorAll('.group-section').forEach(d => { map[d.id] = !!d.open; });
+                localStorage.setItem(COLLAPSE_KEY, JSON.stringify(map));
+            } catch (_) {}
+        }
+        function clearCollapseState() {
+            try { localStorage.removeItem(COLLAPSE_KEY); } catch (_) {}
+        }
+
+        // --- beforeunload guard (fold-in): warn only when dirty vs last-saved snapshot ---
+        let lastSavedSnapshot = '';
+        function markClean() { lastSavedSnapshot = JSON.stringify(gatherDraftData()); }
+        window.addEventListener('beforeunload', (e) => {
+            if (JSON.stringify(gatherDraftData()) !== lastSavedSnapshot) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
         // --- Clear-All undo state ---
         let pendingUndoSnapshot = null;
         let pendingUndoDraft = null;
@@ -627,6 +695,9 @@
             toast.appendChild(span);
             toast.classList.remove('hidden');
             toast.classList.add('flex');
+            toast.classList.remove('toast-in');
+            void toast.offsetWidth;
+            toast.classList.add('toast-in');
             clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
                 toast.classList.add('hidden');
@@ -676,6 +747,7 @@
             localStorage.setItem('meetingNotesDraft', JSON.stringify(gatherDraftData()));
             lastSavedAt = Date.now();
             updateSaveStatus();
+            markClean();
         }
 
         // Listen for input changes to trigger auto-save
@@ -1081,8 +1153,13 @@
                     addMainItem(inputsContainer, categoryDetails[id].placeholder, `${categoryDetails[id].name} item`);
                 }
             });
+            // Clear All resets collapse state to the default (all groups open).
+            document.querySelectorAll('.group-section').forEach(d => { d.open = true; });
+            clearCollapseState();
+            if (typeof syncCollapseAllLabel === 'function') syncCollapseAllLabel();
             DOM.outputSection.classList.add('hidden');
             DOM.outputText.textContent = '';
+            markClean();
         }
 
         function clearUndoTimer() {
@@ -1117,6 +1194,9 @@
             toast.appendChild(undoBtn);
             toast.classList.remove('hidden');
             toast.classList.add('flex');
+            toast.classList.remove('toast-in');
+            void toast.offsetWidth;
+            toast.classList.add('toast-in');
 
             clearUndoTimer();
             undoTimer = setTimeout(hideUndoToast, 10000);
@@ -1127,6 +1207,7 @@
                 hideUndoToast();
                 if (snap) applyDraftData(snap);
                 if (draft) localStorage.setItem('meetingNotesDraft', draft);
+                markClean();
                 scheduleAutoSave();
             };
         }
@@ -1432,7 +1513,7 @@
                     return;
                 }
                 const hasContent = categoryKeys.some(id => (gatherDraftData()[id] || []).length > 0);
-                const doLoad = () => { applyDraftData(shared); stripHash(); };
+                const doLoad = () => { applyDraftData(shared); stripHash(); markClean(); };
                 if (hasContent) {
                     showConfirmation('Load shared notes from the link? This replaces your current notes.', doLoad);
                 } else {
@@ -1657,6 +1738,7 @@
                 parsedData = JSON.parse(draftData);
                 if (!isValidDraftShape(parsedData)) throw new Error('Invalid draft structure');
                 applyDraftData(parsedData);
+                markClean();
             } catch (err) {
                 showToast('Saved notes could not be read; the corrupted draft was removed.', { icon: '⚠️', duration: 5000 });
                 localStorage.removeItem('meetingNotesDraft');
@@ -1849,6 +1931,7 @@
                 const allOpen = Array.from(groups).every(d => d.open);
                 setAllGroupSectionsOpen(!allOpen);
                 syncCollapseAllLabel();
+                writeCollapseMap();
             });
         }
         if (DOM.searchInput) {
@@ -1888,8 +1971,10 @@
                 summary.className = 'cursor-pointer list-none flex items-center justify-between py-2 -mx-2 px-2 rounded-lg select-none hover:bg-[color:var(--surface-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]';
                 summary.innerHTML = `<h2 class="text-2xl font-bold tracking-tight text-[color:var(--text)]">${group.title}</h2><svg class="icon text-slate-400 transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><use href="#icon-chevron"/></svg>`;
 
-                const body = document.createElement('div');
-                body.className = 'pt-4 space-y-4';
+                const disclosure = document.createElement('div');
+                disclosure.className = 'disclosure';
+                const inner = document.createElement('div');
+                inner.className = 'disclosure__inner pt-4 space-y-4';
 
                 group.keys.forEach(id => {
                     const cat = categoryDetails[id];
@@ -1904,20 +1989,35 @@
                                 Add item
                             </button>
                         </div>`;
-                    body.appendChild(categoryElement);
+                    inner.appendChild(categoryElement);
                 });
 
+                disclosure.appendChild(inner);
                 details.appendChild(summary);
-                details.appendChild(body);
+                details.appendChild(disclosure);
                 fragment.appendChild(details);
                 navLinks.push({ slug, label: `${group.emoji} ${group.title}` });
             });
 
             DOM.categoriesContainer.appendChild(fragment);
 
-            // Keep the Collapse/Expand-all toggle label in sync as groups open/close.
+            // Restore persisted collapse state, then keep the Collapse/Expand-all label in sync.
+            // Persistence is written synchronously on user summary clicks (the native toggle is
+            // the default action, so d.open is still the pre-toggle value inside the handler;
+            // we compute the post-toggle state explicitly). Relying on the async `toggle` event
+            // would clobber the saved map with spurious toggles from programmatic open changes.
+            const savedCollapse = readCollapseMap();
             document.querySelectorAll('.group-section').forEach(d => {
+                if (savedCollapse && (d.id in savedCollapse)) d.open = !!savedCollapse[d.id];
                 d.addEventListener('toggle', syncCollapseAllLabel);
+                const summaryEl = d.querySelector('summary');
+                if (summaryEl) summaryEl.addEventListener('click', () => {
+                    const map = {};
+                    document.querySelectorAll('.group-section').forEach(g => {
+                        map[g.id] = (g === d) ? !g.open : !!g.open;
+                    });
+                    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(map)); } catch (_) {}
+                });
             });
             syncCollapseAllLabel();
 
@@ -1983,6 +2083,9 @@
             }
 
             updateSaveStatus();
+
+            // Snapshot the freshly loaded state so beforeunload only warns on real changes.
+            markClean();
         });
     </script>
 </body>
