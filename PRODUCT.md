@@ -1,9 +1,5 @@
 # Product
 
-## Register
-
-product
-
 ## Users
 
 The primary user is a church administrator or operations lead preparing weekly staff meeting notes for Bucks Church. They usually work at a desktop or laptop, once a week, with occasional mobile edits before the meeting.
